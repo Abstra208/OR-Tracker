@@ -20,7 +20,7 @@ module.exports = {
         const exampleEmbed = new EmbedBuilder()
             .setColor(0x0099FF)
             .setTitle('Records Search')
-            .setAuthor({ name: 'Records Tracker', iconURL: 'https://cdn.discordapp.com/app-icons/1294873348387635230/8874dd344c52f3bf66fccee74ab781f1.png', url: 'https://bots.abstra208.com/record-tracker' })
+            .setAuthor({ name: 'Records Tracker', iconURL: 'https://cdn.discordapp.com/app-icons/1294873348387635230/8874dd344c52f3bf66fccee74ab781f1.png', url: 'https://bots.abstra208.com/or-tracker' })
             .setDescription('This is a test embed for the records search command.')
             .setTimestamp();
 
