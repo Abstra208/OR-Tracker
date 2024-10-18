@@ -1,7 +1,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { token } = require('./config.json');
-const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
+const { Client, Collection, Events, GatewayIntentBits, PresenceUpdateStatus, ActivityType, ModalBuilder, ActionRowBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const records = require('./commands/utility/records');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -25,27 +26,40 @@ for (const folder of commandFolders) {
 
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+    readyClient.user.setPresence({
+        activities: [{ name: '/records', type: ActivityType.Listening }],
+        status: 'dnd'
+    });
 });
 
 client.on(Events.InteractionCreate, async interaction => {
-	if (!interaction.isChatInputCommand()) return;
-	const command = interaction.client.commands.get(interaction.commandName);
+	if (interaction.isChatInputCommand()){
+		const command = interaction.client.commands.get(interaction.commandName);
 
-	if (!command) {
-		console.error(`No command matching ${interaction.commandName} was found.`);
-		return;
-	}
-
-	try {
-		await command.execute(interaction);
-	} catch (error) {
-		console.error(error);
-		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-		} else {
-			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+		if (!command) {
+			console.error(`No command matching ${interaction.commandName} was found.`);
+			return;
 		}
-	}
+
+		try {
+			await command.execute(interaction);
+		} catch (error) {
+			console.error(error);
+			if (interaction.replied || interaction.deferred) {
+				await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+			} else {
+				await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+			}
+		}
+	};
+});
+
+client.on(Events.InteractionCreate, async interaction => {
+    if (interaction.isButton()) {
+        await records.handleButtonInteraction(interaction);
+    } else if (interaction.isModalSubmit()) {
+        await records.handleModalSubmit(interaction);
+    }
 });
 
 client.login(token);
