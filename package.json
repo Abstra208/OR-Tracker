@@ -10,7 +10,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@firebase/database": "^1.0.8",
+    "crypto": "^1.0.1",
     "discord.js": "^14.16.3",
+    "firebase": "^10.14.1",
     "json": "^11.0.0",
     "nodemon": "^3.1.7"
   }

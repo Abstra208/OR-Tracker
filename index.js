@@ -59,7 +59,9 @@ client.on(Events.InteractionCreate, async interaction => {
         await records.handleButtonInteraction(interaction);
     } else if (interaction.isModalSubmit()) {
         await records.handleModalSubmit(interaction);
-    }
+    } else if (interaction.isStringSelectMenu()) {
+		await records.handleSelectMenu(interaction);
+	}
 });
 
 client.login(token);
