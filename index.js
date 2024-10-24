@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const { log } = require('node:console');
 const { token } = require('./config.json');
 const { Client, Collection, Events, GatewayIntentBits, PresenceUpdateStatus, ActivityType, ModalBuilder, ActionRowBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
 const records = require('./commands/utility/records');
@@ -55,12 +56,14 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 client.on(Events.InteractionCreate, async interaction => {
-    if (interaction.isButton()) {
-        await records.handleButtonInteraction(interaction);
-    } else if (interaction.isModalSubmit()) {
-        await records.handleModalSubmit(interaction);
-    } else if (interaction.isStringSelectMenu()) {
-		await records.handleSelectMenu(interaction);
+	if (interaction.commandName = 'records'){
+		if (interaction.isButton()) {
+			await records.execute(interaction);
+		} else if (interaction.isModalSubmit()) {
+			await records.execute(interaction);
+		} else if (interaction.isStringSelectMenu()) {
+			await records.execute(interaction);
+		}
 	}
 });
 
