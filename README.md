@@ -12,6 +12,13 @@ OR Tracker is a bot designed specifically for the community of the OR server, fa
 
 You can add OR Tracker to your discord server or as a user app. [Invite OR Tracker](https://discord.com/oauth2/authorize?client_id=1294873348387635230)
 
+# Information
+
+![](https://tokei.rs/b1/github/abstra208/or-tracker)
+![JavaScript](https://img.shields.io/badge/Made%20with-JavaScript-1f425f.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+
+
 ## Image
 
 <img src="https://cloud-6ywvor3t1-hack-club-bot.vercel.app/0image.png" style="height:240px;" >
