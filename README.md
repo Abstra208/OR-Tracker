@@ -16,3 +16,7 @@ You can add OR Tracker to your discord server or as a user app. [Invite OR Track
 
 <img src="https://cloud-6ywvor3t1-hack-club-bot.vercel.app/0image.png" style="height:240px;" >
 <img src="https://cloud-1gpwpmo9r-hack-club-bot.vercel.app/0image.png" style="height:240px;" >
+
+## Information for non-OR player
+
+If you are not a player of Origin Realms, you may still utilize the bot. However, any request to create or update a record will result in a ban. Thank you for your understanding.
