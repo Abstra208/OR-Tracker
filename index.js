@@ -2,8 +2,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { log } = require('node:console');
 const { token } = require('./config.json');
-const { Client, Collection, Events, GatewayIntentBits, PresenceUpdateStatus, ActivityType, ModalBuilder, ActionRowBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { Client, Collection, Events, GatewayIntentBits, ActivityType } = require('discord.js');
 const records = require('./commands/utility/records');
+const { getApp } = require('firebase/app');
+const { getDatabase, set, ref } = require('firebase/database');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -27,6 +29,7 @@ for (const folder of commandFolders) {
 
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+	console.log(`Serving ${readyClient.guilds.cache.size} servers`);
     readyClient.user.setPresence({
         activities: [{ name: '/records', type: ActivityType.Listening }],
         status: 'dnd'
@@ -65,6 +68,13 @@ client.on(Events.InteractionCreate, async interaction => {
 			await records.execute(interaction);
 		}
 	}
+});
+client.on('guildCreate', async guild => {
+	const app = getApp();
+	const db = getDatabase(app);
+	await set(ref(db, '/info'), {
+		'servers': client.guilds.cache.size
+	});
 });
 
 client.login(token);

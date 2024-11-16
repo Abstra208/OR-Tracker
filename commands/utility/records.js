@@ -1,9 +1,7 @@
 const fs = require('node:fs');
 const { apiKey, authDomain, databaseURL, projectId, storageBucket, messagingSenderId, appId } = require('../../config.json');
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder, EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder, EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, client, time, TimestampStyles } = require('discord.js');
 const { log } = require('node:console');
-const { secureHeapUsed } = require('node:crypto');
-const { permission } = require('node:process');
 const crypto = require('crypto');
 const { initializeApp } = require('firebase/app');
 const { getDatabase, ref, set, get, child, update, remove } = require('firebase/database');
@@ -33,7 +31,15 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('tools')
-                .setDescription('Multiple tools to manage the database.')),
+                .setDescription('Multiple tools to manage the database.'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('register')
+                .setDescription('Register a new record or update one. (Admin verification is required)'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('test')
+                .setDescription('Test command for records.'),),
 
     generateRandomId: () => {
         return crypto.randomBytes(16).toString('hex');
@@ -46,8 +52,10 @@ module.exports = {
                 await this.search(interaction);
             } else if (interaction.options.getSubcommand() === 'tools') {
                 await this.tools(interaction);
-            }
-            }
+            } else if (interaction.options.getSubcommand() === 'register') {
+                await this.register(interaction)
+            } else if (interaction.options.getSubcommand() === 'test') {return}
+        }
         } else if (interaction.isButton()) {
             if (interaction.customId === "searchRecord") {
                 await this.search(interaction);
@@ -57,6 +65,12 @@ module.exports = {
                 await this.tools(interaction);
             } else if (interaction.customId === "ChangeTitle" || interaction.customId === "ChangeDescription") {
                 await this.tools(interaction);
+            } else if (interaction.customId === 'registerrecord' || interaction.customId === 'updaterecord') {
+                await this.register(interaction);
+            } else if (interaction.customId === 'Racceptregister' || interaction.customId === 'Rdeclineregister') {
+                await this.register(interaction);
+            } else if (interaction.customId === 'Uacceptregister' || interaction.customId === 'Udeclineregister') {
+                await this.register(interaction);
             }
         } else if (interaction.isModalSubmit()) {
             if (interaction.customId === "addRecordModal") {
@@ -69,6 +83,8 @@ module.exports = {
                 await this.search(interaction);
             } else if (interaction.customId === "AddTitleModal" || interaction.customId === "AddDescriptionModal") {
                 await this.tools(interaction);
+            } else if (interaction.customId === 'registerModal' || interaction.customId === 'updateModal') {
+                await this.register(interaction);
             }
         } else if (interaction.isStringSelectMenu()) {
             await this.tools(interaction);
@@ -84,10 +100,10 @@ module.exports = {
             const record = interaction.options.getString('record');
             const SearchEmbed = new EmbedBuilder()
                 .setColor(0x4fcf6d)
-                .setTitle(`<:medal:1295467247971602492> Results for records`)
+                .setTitle(`Results for records`)
                 .setDescription(`Here are the results for record called: ${record}.`)
                 .setTimestamp()
-                .setFooter({ text: 'Records Tracker' });
+                .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
 
             let recordsFound = [];
             for (const [key, value] of Object.entries(records)) {
@@ -117,10 +133,10 @@ module.exports = {
 
         const ToolsEmbed = new EmbedBuilder()
             .setColor(0x4fcf6d)
-            .setTitle(`<:medal:1295467247971602492> Tools for records`)
+            .setTitle(`Tools for records`)
             .setFields({ name: 'Tools:', value: 'Select a tool from the dropdown menu below.' })
             .setTimestamp()
-            .setFooter({ text: 'Records Tracker' });
+            .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
 
         const ToolsSelect = new StringSelectMenuBuilder()
             .setCustomId("toolsSelect")
@@ -216,10 +232,10 @@ module.exports = {
 
         const ListEmbed = new EmbedBuilder()
             .setColor(0x4fcf6d)
-            .setTitle(`<:medal:1295467247971602492> List of records`)
+            .setTitle(`List of records`)
             .setDescription(`Here is a list of all the records registered by you.\nThey are listed below using the format: Name, Description, ID.`)
             .setTimestamp()
-            .setFooter({ text: 'Records Tracker' });
+            .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
         
         if (interaction.isChatInputCommand()) {
             if (interaction.options.getSubcommand() === 'tools') {
@@ -267,10 +283,10 @@ module.exports = {
             if (interaction.customId === "addRecord") {
                 const UploadEmbed = new EmbedBuilder()
                     .setColor(0x4fcf6d)
-                    .setTitle(`<:medal:1295467247971602492> Add a record`)
+                    .setTitle(`Add a record`)
                     .setDescription(`Adding record to database...`)
                     .setTimestamp()
-                    .setFooter({ text: 'Records Tracker' });
+                    .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
                 await interaction.update({ embeds: [UploadEmbed], components: [] });
                 const name = interaction.message.embeds[0].fields[0].value;
                 const description = interaction.message.embeds[0].fields[1].value;
@@ -286,10 +302,10 @@ module.exports = {
             if (interaction.customId === "modifyRecord"){
                 const EditEmbed = new EmbedBuilder()
                     .setColor(0x4fcf6d)
-                    .setTitle(`<:medal:1295467247971602492> Edit a record`)
+                    .setTitle(`Edit a record`)
                     .setDescription(`Editing the record in the database...`)
                     .setTimestamp()
-                    .setFooter({ text: 'Records Tracker' });
+                    .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
                 await interaction.update({ embeds: [EditEmbed], components: [] });
                 const name = interaction.message.embeds[0].fields[0].value;
                 const description = interaction.message.embeds[0].fields[1].value;
@@ -323,13 +339,13 @@ module.exports = {
                 const description = interaction.fields.getTextInputValue("description");
                 const AddEmbedModal = new EmbedBuilder()
                     .setColor(0x4fcf6d)
-                    .setTitle(`<:medal:1295467247971602492> Add a record`)
+                    .setTitle(`Add a record`)
                     .setFields(
                         { name: 'Name:', value: name },
                         { name: 'Description:', value: description }
                     )
                     .setTimestamp()
-                    .setFooter({ text: 'Records Tracker' });
+                    .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
            
                 const ChangeTitle = new ButtonBuilder()
                     .setCustomId("ChangeTitle")
@@ -356,7 +372,7 @@ module.exports = {
                 record = records[id]
                 const EditEmbedModal = new EmbedBuilder()
                     .setColor(0x4fcf6d)
-                    .setTitle(`<:medal:1295467247971602492> Edit a record`)
+                    .setTitle(`Edit a record`)
                     .setFields(
                         { name: 'Name:', value: record.name },
                         { name: 'Description:', value: record.description }
@@ -389,10 +405,10 @@ module.exports = {
     
                 const DeleteEmbedModal = new EmbedBuilder()
                     .setColor(0x4fcf6d)
-                    .setTitle(`<:medal:1295467247971602492> Delete a record`)
+                    .setTitle(`Delete a record`)
                     .setDescription(`Deleting record from database...`)
                     .setTimestamp()
-                    .setFooter({ text: 'Records Tracker' });
+                    .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
     
                 await interaction.reply({ embeds: [DeleteEmbedModal], ephemeral: true });
                 if (records === null) {
@@ -416,10 +432,10 @@ module.exports = {
                 }
                 const SearchEmbed = new EmbedBuilder()
                     .setColor(0x4fcf6d)
-                    .setTitle(`<:medal:1295467247971602492> Results for records`)
+                    .setTitle(`Results for records`)
                     .setDescription(`Here are the results for record called: ${name}.`)
                     .setTimestamp()
-                    .setFooter({ text: 'Records Tracker' });
+                    .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
                 if (recordsFound.length > 0) {
                     for (const key of recordsFound) {
                         const value = records[key];
@@ -476,6 +492,307 @@ module.exports = {
                     fs.rmSync('./temp', { recursive: true });
                 } else {
                     await interaction.reply({ content: "You do not have permission to export the records.", ephemeral: true });
+                }
+            }
+        }
+    },
+    async register(interaction) {
+        const records = (await get(child(ref(db), '/records'))).val();
+        const awaitRegistration = (await get(child(ref(db), '/awaitRegistration'))).val();
+        const awaitUpdate = (await get(child(ref(db), '/awaitUpdate'))).val();
+        const registerEmbed = new EmbedBuilder()
+            .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
+            .setColor(0x4fcf6d)
+            .setTitle(`Register or update a record`)
+            .setDescription(`Click on one of the button below to register or update a record.`)
+            .setTimestamp()
+
+        const registerButton = new ButtonBuilder()
+            .setCustomId("registerrecord")
+            .setLabel('Register a new record')
+            .setStyle(ButtonStyle.Primary)
+
+        const updateButton = new ButtonBuilder()
+            .setCustomId('updaterecord')
+            .setLabel('Update a new record')
+            .setStyle(ButtonStyle.Primary)
+
+        const registerRow = new ActionRowBuilder().addComponents(
+            registerButton, updateButton
+        )
+
+        const registerModal = new ModalBuilder()
+            .setCustomId("registerModal")
+            .setTitle("Register a record")
+                registerModal.addComponents(
+                    new ActionRowBuilder().addComponents(
+                        new TextInputBuilder()
+                            .setCustomId("name")
+                            .setLabel("Name")
+                            .setPlaceholder("Enter the name of the record.")
+                            .setRequired(true)
+                            .setStyle(TextInputStyle.Short),
+                    ),
+                    new ActionRowBuilder().addComponents(
+                        new TextInputBuilder()
+                            .setCustomId("description")
+                            .setLabel("Description")
+                            .setPlaceholder("Enter the description of the record.")
+                            .setStyle(TextInputStyle.Paragraph)
+                            .setRequired(true),
+                    ),
+                    new ActionRowBuilder().addComponents(
+                        new TextInputBuilder()
+                            .setCustomId("link")
+                            .setLabel("Verification Link")
+                            .setPlaceholder("Enter a link to verify the record. (Youtube, Twitch, etc.)")
+                            .setStyle(TextInputStyle.Short),
+                    ),
+                );
+
+        const updateModal = new ModalBuilder()
+            .setCustomId("updateModal")
+            .setTitle("Update a record")
+                updateModal.addComponents(
+                    new ActionRowBuilder().addComponents(
+                        new TextInputBuilder()
+                            .setCustomId("id")
+                            .setLabel("ID")
+                            .setPlaceholder('Enter the ID of the record.')
+                            .setRequired(true)
+                            .setStyle(TextInputStyle.Short),
+                    ),
+                    new ActionRowBuilder().addComponents(
+                        new TextInputBuilder()
+                            .setCustomId("reason")
+                            .setLabel("Update reason")
+                            .setPlaceholder("Enter how we could update the record. If you have proof, place it here. (Youtube, Twitch, etc.)")
+                            .setStyle(TextInputStyle.Paragraph),
+                    ),
+                );
+
+        const ThreadEmbed = new EmbedBuilder()
+            .setColor(0x4fcf6d)
+            .setTitle(`Thread created`)
+            .setDescription(`A thread has been created for you to discuss the record.`)
+            .setTimestamp()
+            .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
+
+        const RaccepteregisterButton = new ButtonBuilder()
+            .setCustomId("Racceptregister")
+            .setLabel('Accept the record')
+            .setStyle(ButtonStyle.Success)
+
+        const RdeclineregisterButton = new ButtonBuilder()
+            .setCustomId('Rdeclineregister')
+            .setLabel('Decline the record')
+            .setStyle(ButtonStyle.Danger)
+
+        const UacceptregisterButton = new ButtonBuilder()
+            .setCustomId("Uacceptregister")
+            .setLabel('Accept the record')
+            .setStyle(ButtonStyle.Success)
+            
+        const UdeclineregisterButton = new ButtonBuilder()
+            .setCustomId('Udeclineregister')
+            .setLabel('Decline the record')
+            .setStyle(ButtonStyle.Danger)
+
+        const OptionregisterRow = new ActionRowBuilder().addComponents(RaccepteregisterButton, RdeclineregisterButton);
+        const OptionupdateRow = new ActionRowBuilder().addComponents(UacceptregisterButton, UdeclineregisterButton);
+
+        if (interaction.isChatInputCommand()) {
+            await interaction.reply({ embeds: [registerEmbed], components: [registerRow] })
+        } else if (interaction.isButton()) {
+            if (interaction.customId === 'registerrecord') {
+                await interaction.showModal(registerModal);
+            } else if (interaction.customId === 'updaterecord') {
+                await interaction.showModal(updateModal);
+            } else if (interaction.customId === 'Racceptregister') {
+                const id = interaction.message.embeds[0].fields[4].value;
+                const record = awaitRegistration[id];
+                const owner = record.person;
+                const user = await interaction.client.users.fetch(owner);
+                const ThreadId = await interaction.channelId;
+                const thread = await interaction.client.channels.fetch(ThreadId);
+                const date = new Date();
+
+                await set(ref(db, 'records/' + id), {
+                    name: record.name,
+                    description: record.description,
+                    link: record.link,
+                    owner: record.person,
+                    creation: time(date)
+                });
+
+                const acceptEmbed = new EmbedBuilder()
+                    .setColor(0x4fcf6d)
+                    .setTitle(`Record Accepted`)
+                    .setDescription(`One of your records has been accepted.`)
+                    .addFields(
+                        { name: 'Record:', value: record.name },
+                        { name: 'Description:', value: record.description },
+                        { name: 'ID:', value: id },
+                        { name: 'Date:', value: time(date) }
+                    )
+                    .setTimestamp()
+                    .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
+                
+                const serverlink = new ButtonBuilder()
+                    .setLabel('OR Tracker server')
+                    .setStyle(ButtonStyle.Link)
+                    .setURL("https://discord.gg/qHt6dKqTJ3");
+                
+                const userrow = new ActionRowBuilder().addComponents(serverlink);
+
+                await remove(ref(db, 'awaitRegistration/' + id));
+                await user.send({ embeds: [acceptEmbed], components: [userrow] });
+                await interaction.update({ content: `Record ${record.name} has been accepted. This thread will get deleted in 5 seconds`, embeds: [], components: [] });
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                await thread.delete();
+            } else if (interaction.customId === 'Rdeclineregister') {
+                const id = interaction.message.embeds[0].fields[4].value;
+                const record = awaitRegistration[id];
+                const owner = record.person;
+                const user = await interaction.client.users.fetch(owner);
+                const ThreadId = await interaction.channelId;
+                const thread = await interaction.client.channels.fetch(ThreadId);
+                const date = new Date();
+
+                const declineEmbed = new EmbedBuilder()
+                    .setColor(0x4fcf6d)
+                    .setTitle(`Record declined`)
+                    .setDescription(`One of your records has been declined.\nIf you have any questions, please contact an admin.`)
+                    .addFields(
+                        { name: 'Record:', value: record.name },
+                        { name: 'ID:', value: id },
+                        { name: 'Date:', value: time(date) }
+                    )
+                    .setTimestamp()
+                    .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
+                
+                const serverlink = new ButtonBuilder()
+                    .setLabel('OR Tracker server')
+                    .setStyle(ButtonStyle.Link)
+                    .setURL("https://discord.gg/qHt6dKqTJ3");
+                
+                const userrow = new ActionRowBuilder().addComponents(serverlink);
+                
+                await remove(ref(db, 'awaitRegistration/' + id));
+                await user.send({ embeds: [declineEmbed], components: [userrow] });
+                await interaction.update({ content: `Record ${record.name} has been declined. This thread will get deleted in 5 seconds`, embeds: [], components: [] });
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                await thread.delete();
+            } else if (interaction.customId === 'Uacceptregister') {
+                const id = interaction.message.embeds[0].fields[3].value;
+                const record = awaitUpdate[id];
+                const user = await interaction.client.users.fetch(owner);
+                const ThreadId = await interaction.channelId;
+                const thread = await interaction.client.channels.fetch(ThreadId);
+                const date = new Date();
+
+                await set(ref(db, 'records/' + id), {
+                    name: record.name,
+                    description: records.description,
+                    link: record.link,
+                    owner: record.person,
+                    creation: time(date)
+                });
+
+                const acceptEmbed = new EmbedBuilder()
+                    .setColor(0x4fcf6d)
+                    .setTitle(`Record Accepted`)
+                    .setDescription(`One of your records has been accepted.`)
+                    .addFields(
+                        { name: 'Record:', value: record.name },
+                        { name: 'Description:', value: record.description },
+                        { name: 'ID:', value: id },
+                        { name: 'Date:', value: record.creation }
+                    )
+                    .setTimestamp()
+                    .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
+
+                await remove(ref(db, 'awaitUpdate/' + id));
+                await thread.delete();
+                await user.send({ embeds: [acceptEmbed] });
+            } else if (interaction.customId === "Udeclineregister") {
+                const id = interaction.message.embeds[0].fields[3].value;
+                const record = awaitUpdate[id];
+                const owner = record.person;
+                const user = await interaction.client.users.fetch(owner);
+                const ThreadId = await interaction.channelId;
+                const thread = await interaction.client.channels.fetch(ThreadId);
+                const date = new Date();
+
+                const declineEmbed = new EmbedBuilder()
+                    .setColor(0x4fcf6d)
+                    .setTitle(`Record declined`)
+                    .setDescription(`One of your records has been declined.`)
+                    .addFields(
+                        { name: 'Record:', value: record.name },
+                        { name: 'ID:', value: id },
+                        { name: 'Date:', value: time(date) }
+                    )
+                    .setTimestamp()
+                    .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
+                
+                await remove(ref(db, 'awaitUpdate/' + id));
+                await thread.delete();
+                await user.send({ embeds: [declineEmbed] });
+            }
+        } else if (interaction.isModalSubmit()) {
+            if (interaction.customId === 'registerModal') {
+                const name = interaction.fields.getTextInputValue("name");
+                const description = interaction.fields.getTextInputValue('description');
+                const link = interaction.fields.getTextInputValue('link');
+                const id = this.generateRandomId();
+                const channelID = '1299763314816974929';
+                const channel = await interaction.client.channels.fetch(channelID);
+                await set(ref(db, 'awaitRegistration/' + id), {
+                    name: name,
+                    description: description,
+                    link: link,
+                    person: interaction.user.id
+                });
+                ThreadEmbed.addFields(
+                    { name: 'Record:', value: name },
+                    { name: 'Description:', value: description },
+                    { name: 'Link:', value: link },
+                    { name: 'Person', value: `<@!${interaction.user.id}>` },
+                    { name: 'ID:', value: id }
+                );
+                channel.threads.create({
+                    name: `Creation of record ${name}`,
+                    autoArchiveDuration: 60,
+                    reason: `Verification for record ${name} with ID: ${id}.`,
+                    message: { content: `New record ${name} is waiting review by an admin`, embeds: [ThreadEmbed], components: [OptionregisterRow] }
+                });
+                await interaction.reply({ content: `Thank you for your submission. Record ${name} has been added to the verification list for admin review. This process may take up to two business days.`, ephemeral: true });
+            } else if (interaction.customId === 'updateModal') {
+                const id = interaction.fields.getTextInputValue("id");
+                const reason = interaction.fields.getTextInputValue('reason');
+                const channelID = '1299763314816974929';
+                const channel = await interaction.client.channels.fetch(channelID);
+                if (records.hasOwnProperty(id)) {
+                    await set(ref(db, 'awaitUpdate/' + id), {
+                        reason: reason,
+                        person: interaction.user.id
+                    });
+                    ThreadEmbed.addFields(
+                        { name: 'Record:', value: records[id].name },
+                        { name: 'Description:', value: records[id].description },
+                        { name: 'Person', value: `<@!${records[id].person}>` },
+                        { name: 'ID:', value: id }
+                    );
+                    channel.threads.create({
+                        name: `Update of record ${records[id].name}`,
+                        autoArchiveDuration: 60,
+                        reason: `Update for record ${records[id].name} with ID: ${id}.`,
+                        message: { content: `Record ${records[id].name} is waiting review by an admin`, embeds: [ThreadEmbed], components: [OptionupdateRow] }
+                    });
+                    await interaction.reply({ content: `Thank you for your submission. Record with id: ${id} has been added to the verification list for admin review. This process may take up to two business days.`, ephemeral: true });
+                } else {
+                    await interaction.reply({ content: `We couldn't find a record with the ID ${id}. Please check the ID and try again.`, ephemeral: true });
                 }
             }
         }
