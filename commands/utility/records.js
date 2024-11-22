@@ -591,14 +591,14 @@ module.exports = {
                         new TextInputBuilder()
                             .setCustomId("reason")
                             .setLabel("Update reason")
-                            .setPlaceholder("Enter how we could update the record. If you have proof, place it here. (Youtube, Twitch, etc.)")
+                            .setPlaceholder("Enter how we could update the record.")
                             .setStyle(TextInputStyle.Paragraph),
                     ),
                     new ActionRowBuilder().addComponents(
                         new TextInputBuilder()
                             .setCustomId("link")
                             .setLabel("Verification Link")
-                            .setPlaceholder("Enter a link to verify the record. (Youtube, Twitch, etc.)")
+                            .setPlaceholder("Enter any proof needed to verify the update. (Youtube, Twitch, etc.)")
                             .setStyle(TextInputStyle.Short),
                     ),
                 );
