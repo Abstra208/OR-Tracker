@@ -1,7 +1,6 @@
 const fs = require('node:fs');
 const { apiKey, authDomain, databaseURL, projectId, storageBucket, messagingSenderId, appId } = require('../../config.json');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder, EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, client, time, TimestampStyles } = require('discord.js');
-const { log } = require('node:console');
 const crypto = require('crypto');
 const { initializeApp } = require('firebase/app');
 const { getDatabase, ref, set, get, child, update, remove } = require('firebase/database');
@@ -38,8 +37,8 @@ module.exports = {
                 .setDescription('Register a new record or update one. (Admin verification is required)'))
         .addSubcommand(subcommand =>
             subcommand
-                .setName('test')
-                .setDescription('Test command for records.'),),
+                .setName('help')
+                .setDescription('Provide links and informations to help you get started with the bot.'),),
 
     generateRandomId: () => {
         return crypto.randomBytes(16).toString('hex');
@@ -53,8 +52,10 @@ module.exports = {
             } else if (interaction.options.getSubcommand() === 'tools') {
                 await this.tools(interaction);
             } else if (interaction.options.getSubcommand() === 'register') {
-                await this.register(interaction)
-            } else if (interaction.options.getSubcommand() === 'test') {return}
+                await this.register(interaction);
+            } else if (interaction.options.getSubcommand() === 'help') {
+                await this.help(interaction);
+            }
         }
         } else if (interaction.isButton()) {
             if (interaction.customId === "searchRecord") {
@@ -89,6 +90,30 @@ module.exports = {
         } else if (interaction.isStringSelectMenu()) {
             await this.tools(interaction);
         }
+    },
+    async help(interaction) {
+        const HelpEmbed = new EmbedBuilder()
+            .setColor(0x4fcf6d)
+            .setTitle(`Help for records`)
+            .setDescription(`Here are some useful links and informations to help you get started with the bot.`)
+            .setTimestamp()
+            .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
+            .addFields(
+                { name: '/record search', value: 'Search for a record in the database.', inline: true },
+                { name: '/record tools', value: 'Multiple tools to manage the database.', inline: true },
+                { name: '/record register', value: 'Register a new record or update one. (Admin verification is required)', inline: true },
+                { name: '/record help', value: 'Provide links and informations to help you get started with the bot.' },
+            )
+        const WebsiteButton = new ButtonBuilder()
+            .setLabel('OR Tracker Website')
+            .setStyle(ButtonStyle.Link)
+            .setURL("https://ortracker.app")
+        const DiscordButton = new ButtonBuilder()
+            .setLabel('OR Tracker Discord')
+            .setStyle(ButtonStyle.Link)
+            .setURL("https://discord.gg/qHt6dKqTJ3")
+        const Helprow = new ActionRowBuilder().addComponents(WebsiteButton, DiscordButton);
+        await interaction.reply({ embeds: [HelpEmbed], components: [Helprow] });
     },
     async search(interaction) {
         const Recordsnapshot = await get(child(ref(db), '/records'));
@@ -569,6 +594,13 @@ module.exports = {
                             .setPlaceholder("Enter how we could update the record. If you have proof, place it here. (Youtube, Twitch, etc.)")
                             .setStyle(TextInputStyle.Paragraph),
                     ),
+                    new ActionRowBuilder().addComponents(
+                        new TextInputBuilder()
+                            .setCustomId("link")
+                            .setLabel("Verification Link")
+                            .setPlaceholder("Enter a link to verify the record. (Youtube, Twitch, etc.)")
+                            .setStyle(TextInputStyle.Short),
+                    ),
                 );
 
         const ThreadEmbed = new EmbedBuilder()
@@ -642,8 +674,13 @@ module.exports = {
                     .setLabel('OR Tracker server')
                     .setStyle(ButtonStyle.Link)
                     .setURL("https://discord.gg/qHt6dKqTJ3");
+
+                const websitelink = new ButtonBuilder()
+                    .setLabel('OR Tracker Website')
+                    .setStyle(ButtonStyle.Link)
+                    .setURL("https://ortracker.app");
                 
-                const userrow = new ActionRowBuilder().addComponents(serverlink);
+                const userrow = new ActionRowBuilder().addComponents(serverlink, websitelink);
 
                 await remove(ref(db, 'awaitRegistration/' + id));
                 await user.send({ embeds: [acceptEmbed], components: [userrow] });
@@ -675,25 +712,31 @@ module.exports = {
                     .setLabel('OR Tracker server')
                     .setStyle(ButtonStyle.Link)
                     .setURL("https://discord.gg/qHt6dKqTJ3");
+
+                const websitelink = new ButtonBuilder()
+                    .setLabel('OR Tracker Website')
+                    .setStyle(ButtonStyle.Link)
+                    .setURL("https://ortracker.app");
                 
-                const userrow = new ActionRowBuilder().addComponents(serverlink);
+                const userrow = new ActionRowBuilder().addComponents(serverlink, websitelink);
                 
-                await remove(ref(db, 'awaitRegistration/' + id));
                 await user.send({ embeds: [declineEmbed], components: [userrow] });
                 await interaction.update({ content: `Record ${record.name} has been declined. This thread will get deleted in 5 seconds`, embeds: [], components: [] });
+                await remove(ref(db, 'awaitRegistration/' + id));
                 await new Promise(resolve => setTimeout(resolve, 5000));
                 await thread.delete();
             } else if (interaction.customId === 'Uacceptregister') {
-                const id = interaction.message.embeds[0].fields[3].value;
+                const id = interaction.message.embeds[0].fields[5].value;
                 const record = awaitUpdate[id];
+                const owner = record.person;
                 const user = await interaction.client.users.fetch(owner);
                 const ThreadId = await interaction.channelId;
                 const thread = await interaction.client.channels.fetch(ThreadId);
                 const date = new Date();
 
-                await set(ref(db, 'records/' + id), {
-                    name: record.name,
-                    description: records.description,
+                await update(ref(db, 'records/' + id), {
+                    name: records[id].name,
+                    description: records[id].description,
                     link: record.link,
                     owner: record.person,
                     creation: time(date)
@@ -704,19 +747,31 @@ module.exports = {
                     .setTitle(`Record Accepted`)
                     .setDescription(`One of your records has been accepted.`)
                     .addFields(
-                        { name: 'Record:', value: record.name },
-                        { name: 'Description:', value: record.description },
+                        { name: 'Record:', value: records[id].name },
+                        { name: 'Description:', value: records[id].description },
                         { name: 'ID:', value: id },
-                        { name: 'Date:', value: record.creation }
+                        { name: 'Date:', value: time(date) }
                     )
                     .setTimestamp()
                     .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
 
+                const serverlink = new ButtonBuilder()
+                    .setLabel('OR Tracker server')
+                    .setStyle(ButtonStyle.Link)
+                    .setURL("https://discord.gg/qHt6dKqTJ3");
+
+                const websitelink = new ButtonBuilder()
+                    .setLabel('OR Tracker Website')
+                    .setStyle(ButtonStyle.Link)
+                    .setURL("https://ortracker.app");
+                
+                const userrow = new ActionRowBuilder().addComponents(serverlink, websitelink);
+
                 await remove(ref(db, 'awaitUpdate/' + id));
                 await thread.delete();
-                await user.send({ embeds: [acceptEmbed] });
+                await user.send({ embeds: [acceptEmbed], components: [userrow] });
             } else if (interaction.customId === "Udeclineregister") {
-                const id = interaction.message.embeds[0].fields[3].value;
+                const id = interaction.message.embeds[0].fields[5].value;
                 const record = awaitUpdate[id];
                 const owner = record.person;
                 const user = await interaction.client.users.fetch(owner);
@@ -726,19 +781,33 @@ module.exports = {
 
                 const declineEmbed = new EmbedBuilder()
                     .setColor(0x4fcf6d)
-                    .setTitle(`Record declined`)
-                    .setDescription(`One of your records has been declined.`)
+                    .setTitle(`Update declined`)
+                    .setDescription(`One of your update has been declined.\nIf you have any questions, please contact an admin.`)
                     .addFields(
-                        { name: 'Record:', value: record.name },
+                        { name: 'Record:', value: records[id].name },
                         { name: 'ID:', value: id },
                         { name: 'Date:', value: time(date) }
                     )
                     .setTimestamp()
                     .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
+
+                const serverlink = new ButtonBuilder()
+                    .setLabel('OR Tracker server')
+                    .setStyle(ButtonStyle.Link)
+                    .setURL("https://discord.gg/qHt6dKqTJ3");
+
+                const websitelink = new ButtonBuilder()
+                    .setLabel('OR Tracker Website')
+                    .setStyle(ButtonStyle.Link)
+                    .setURL("https://ortracker.app");
                 
+                const userrow = new ActionRowBuilder().addComponents(serverlink, websitelink);
+
                 await remove(ref(db, 'awaitUpdate/' + id));
+                await user.send({ embeds: [declineEmbed], components: [userrow] });
+                await interaction.update({ content: `Update to ${records[id].name} has been declined. This thread will get deleted in 5 seconds`, embeds: [], components: [] });
+                await new Promise(resolve => setTimeout(resolve, 5000));
                 await thread.delete();
-                await user.send({ embeds: [declineEmbed] });
             }
         } else if (interaction.isModalSubmit()) {
             if (interaction.customId === 'registerModal') {
@@ -771,17 +840,21 @@ module.exports = {
             } else if (interaction.customId === 'updateModal') {
                 const id = interaction.fields.getTextInputValue("id");
                 const reason = interaction.fields.getTextInputValue('reason');
+                const link = interaction.fields.getTextInputValue('link');
                 const channelID = '1299763314816974929';
                 const channel = await interaction.client.channels.fetch(channelID);
                 if (records.hasOwnProperty(id)) {
                     await set(ref(db, 'awaitUpdate/' + id), {
                         reason: reason,
-                        person: interaction.user.id
+                        person: interaction.user.id,
+                        link: link
                     });
                     ThreadEmbed.addFields(
                         { name: 'Record:', value: records[id].name },
                         { name: 'Description:', value: records[id].description },
-                        { name: 'Person', value: `<@!${records[id].person}>` },
+                        { name: 'Owner', value: `<@!${records[id].owner}>` },
+                        { name: 'Update reason', value: `${reason}` },
+                        { name: 'Person', value: `<@!${interaction.user.id}>` },
                         { name: 'ID:', value: id }
                     );
                     channel.threads.create({
