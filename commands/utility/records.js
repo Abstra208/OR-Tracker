@@ -440,7 +440,7 @@ module.exports = {
                     DeleteEmbedModal.setDescription(`No record with id: *${id}* was found.`);
                     await interaction.editReply({ embeds: [DeleteEmbedModal], ephemeral: true });
                 } else {
-                    DeleteEmbedModal.setDescription(`Record ${record.name} (${id}) has been deleted from the database.`);
+                    DeleteEmbedModal.setDescription(`Record ${records[id].name} (${id}) has been deleted from the database.`);
                     await remove(ref(db, 'records/' + id));
                     await interaction.editReply({ embeds: [DeleteEmbedModal], ephemeral: true });
                 }
