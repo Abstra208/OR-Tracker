@@ -84,7 +84,7 @@ module.exports = {
                 await this.search(interaction);
             } else if (interaction.customId === "AddTitleModal" || interaction.customId === "AddDescriptionModal") {
                 await this.tools(interaction);
-            } else if (interaction.customId === 'registerModal' || interaction.customId === 'updateModal') {
+            } else if (interaction.customId === 'registerModal' || interaction.customId === 'updateModal' || interaction.customId === 'acceptmodalupdate' || interaction.customId === 'declinemodalupdate') {
                 await this.register(interaction);
             }
         } else if (interaction.isStringSelectMenu()) {
@@ -727,87 +727,48 @@ module.exports = {
                 await thread.delete();
             } else if (interaction.customId === 'Uacceptregister') {
                 const id = interaction.message.embeds[0].fields[5].value;
-                const record = awaitUpdate[id];
-                const owner = record.person;
-                const user = await interaction.client.users.fetch(owner);
-                const ThreadId = await interaction.channelId;
-                const thread = await interaction.client.channels.fetch(ThreadId);
-                const date = new Date();
 
-                await update(ref(db, 'records/' + id), {
-                    name: records[id].name,
-                    description: records[id].description,
-                    link: record.link,
-                    owner: record.person,
-                    creation: time(date)
-                });
+                const AcceptModalUpdate = new ModalBuilder()
+                    .setCustomId("acceptmodalupdate")
+                    .setTitle("Update a record")
+                        AcceptModalUpdate.addComponents(
+                            new ActionRowBuilder().addComponents(
+                                new TextInputBuilder()
+                                    .setCustomId("name")
+                                    .setLabel("Update the name")
+                                    .setPlaceholder("Enter the new name of the record from the update reason.")
+                                    .setStyle(TextInputStyle.Short)
+                                    .setValue(records[id].name),
+                            ),
+                            new ActionRowBuilder().addComponents(
+                                new TextInputBuilder()
+                                    .setCustomId("description")
+                                    .setLabel("Update the description")
+                                    .setPlaceholder("Enter the new description of the record from the update reason.")
+                                    .setStyle(TextInputStyle.Paragraph)
+                                    .setValue(records[id].description),
+                            ),
+                        );
 
-                const acceptEmbed = new EmbedBuilder()
-                    .setColor(0x4fcf6d)
-                    .setTitle(`Record Accepted`)
-                    .setDescription(`One of your records has been accepted.`)
-                    .addFields(
-                        { name: 'Record:', value: records[id].name },
-                        { name: 'Description:', value: records[id].description },
-                        { name: 'ID:', value: id },
-                        { name: 'Date:', value: time(date) }
-                    )
-                    .setTimestamp()
-                    .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
+                await interaction.showModal(AcceptModalUpdate);
 
-                const serverlink = new ButtonBuilder()
-                    .setLabel('OR Tracker server')
-                    .setStyle(ButtonStyle.Link)
-                    .setURL("https://discord.gg/qHt6dKqTJ3");
-
-                const websitelink = new ButtonBuilder()
-                    .setLabel('OR Tracker Website')
-                    .setStyle(ButtonStyle.Link)
-                    .setURL("https://ortracker.app");
-                
-                const userrow = new ActionRowBuilder().addComponents(serverlink, websitelink);
-
-                await remove(ref(db, 'awaitUpdate/' + id));
-                await thread.delete();
-                await user.send({ embeds: [acceptEmbed], components: [userrow] });
             } else if (interaction.customId === "Udeclineregister") {
                 const id = interaction.message.embeds[0].fields[5].value;
-                const record = awaitUpdate[id];
-                const owner = record.person;
-                const user = await interaction.client.users.fetch(owner);
-                const ThreadId = await interaction.channelId;
-                const thread = await interaction.client.channels.fetch(ThreadId);
-                const date = new Date();
-
-                const declineEmbed = new EmbedBuilder()
-                    .setColor(0x4fcf6d)
-                    .setTitle(`Update declined`)
-                    .setDescription(`One of your update has been declined.\nIf you have any questions, please contact an admin.`)
-                    .addFields(
-                        { name: 'Record:', value: records[id].name },
-                        { name: 'ID:', value: id },
-                        { name: 'Date:', value: time(date) }
-                    )
-                    .setTimestamp()
-                    .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
-
-                const serverlink = new ButtonBuilder()
-                    .setLabel('OR Tracker server')
-                    .setStyle(ButtonStyle.Link)
-                    .setURL("https://discord.gg/qHt6dKqTJ3");
-
-                const websitelink = new ButtonBuilder()
-                    .setLabel('OR Tracker Website')
-                    .setStyle(ButtonStyle.Link)
-                    .setURL("https://ortracker.app");
                 
-                const userrow = new ActionRowBuilder().addComponents(serverlink, websitelink);
+                const DeclineModalUpdate = new ModalBuilder()
+                    .setCustomId("declinemodalupdate")
+                    .setTitle("Update a record")
+                        DeclineModalUpdate.addComponents(
+                            new ActionRowBuilder().addComponents(
+                                new TextInputBuilder()
+                                    .setCustomId("reason")
+                                    .setLabel("Decline reason")
+                                    .setPlaceholder("Enter the reason for declining the update.")
+                                    .setStyle(TextInputStyle.Paragraph),
+                            ),
+                        );
 
-                await remove(ref(db, 'awaitUpdate/' + id));
-                await user.send({ embeds: [declineEmbed], components: [userrow] });
-                await interaction.update({ content: `Update to ${records[id].name} has been declined. This thread will get deleted in 5 seconds`, embeds: [], components: [] });
-                await new Promise(resolve => setTimeout(resolve, 5000));
-                await thread.delete();
+                await interaction.showModal(DeclineModalUpdate);
             }
         } else if (interaction.isModalSubmit()) {
             if (interaction.customId === 'registerModal') {
@@ -867,6 +828,98 @@ module.exports = {
                 } else {
                     await interaction.reply({ content: `We couldn't find a record with the ID ${id}. Please check the ID and try again.`, ephemeral: true });
                 }
+            } else if (interaction.customId === 'acceptmodalupdate') {
+                const name = interaction.fields.getTextInputValue("name");
+                const description = interaction.fields.getTextInputValue('description');
+                const id = interaction.message.embeds[0].fields[5].value;
+                const ThreadId = await interaction.channelId;
+                const thread = await interaction.client.channels.fetch(ThreadId);
+                const record = awaitUpdate[id];
+                const owner = record.person;
+                const user = await interaction.client.users.fetch(owner);
+
+                await update(ref(db, 'records/' + id), {
+                    name: name,
+                    description: description
+                });
+
+                await remove(ref(db, 'awaitUpdate/' + id));
+                await interaction.update({ content: `Update to ${records[id].name} has been accepted. This thread will get deleted in 5 seconds`, embeds: [], components: [] });
+                await new Promise(resolve => setTimeout(resolve, 5000));
+
+                const date = new Date();
+                const updatedrecord = (await get(child(ref(db), '/records/' + id))).val();
+
+                const acceptEmbed = new EmbedBuilder()
+                    .setColor(0x4fcf6d)
+                    .setTitle(`Record Accepted`)
+                    .setDescription(`One of your records has been accepted.`)
+                    .addFields(
+                        { name: 'Record:', value: updatedrecord.name },
+                        { name: 'Description:', value: updatedrecord.description },
+                        { name: 'ID:', value: id },
+                        { name: 'Date:', value: time(date) }
+                    )
+                    .setTimestamp()
+                    .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
+
+                const serverlink = new ButtonBuilder()
+                    .setLabel('OR Tracker server')
+                    .setStyle(ButtonStyle.Link)
+                    .setURL("https://discord.gg/qHt6dKqTJ3");
+
+                const websitelink = new ButtonBuilder()
+                    .setLabel('OR Tracker Website')
+                    .setStyle(ButtonStyle.Link)
+                    .setURL("https://ortracker.app");
+                
+                const userrow = new ActionRowBuilder().addComponents(serverlink, websitelink);
+
+                await user.send({ embeds: [acceptEmbed], components: [userrow] });
+                await thread.delete();
+            } else if (interaction.customId === 'declinemodalupdate') {
+                const reason = interaction.fields.getTextInputValue('reason');
+                const id = interaction.message.embeds[0].fields[5].value;
+                const ThreadId = await interaction.channelId;
+                const thread = await interaction.client.channels.fetch(ThreadId);
+                const record = awaitUpdate[id];
+                const owner = record.person;
+                const user = await interaction.client.users.fetch(owner);
+                
+                await remove(ref(db, 'awaitUpdate/' + id));
+                await interaction.update({ content: `Update to ${records[id].name} has been declined. This thread will get deleted in 5 seconds`, embeds: [], components: [] });
+                await new Promise(resolve => setTimeout(resolve, 5000));
+
+                const date = new Date();
+
+                const declineEmbed = new EmbedBuilder()
+                    .setColor(0x4fcf6d)
+                    .setTitle(`Update declined`)
+                    .setDescription(`One of your update has been declined.\nIf you have any questions, please contact an admin.`)
+                    .addFields(
+                        { name: 'Record:', value: records[id].name },
+                        { name: 'Update reason:', value: record.reason },
+                        { name: 'Decline reason:', value: reason },
+                        { name: 'ID:', value: id },
+                        { name: 'Date:', value: time(date) }
+                    )
+                    .setTimestamp()
+                    .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
+
+                const serverlink = new ButtonBuilder()
+                    .setLabel('OR Tracker server')
+                    .setStyle(ButtonStyle.Link)
+                    .setURL("https://discord.gg/qHt6dKqTJ3");
+
+                const websitelink = new ButtonBuilder()
+                    .setLabel('OR Tracker Website')
+                    .setStyle(ButtonStyle.Link)
+                    .setURL("https://ortracker.app");
+                
+                const userrow = new ActionRowBuilder().addComponents(serverlink, websitelink);
+
+                await user.send({ embeds: [declineEmbed], components: [userrow] });
+                await thread.delete();
             }
         }
     }
