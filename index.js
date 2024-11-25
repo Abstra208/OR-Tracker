@@ -75,5 +75,9 @@ client.on('guildCreate', async guild => {
 		'servers': client.guilds.cache.size
 	});
 });
+client.on('guildMemberAdd', async member => {
+	const role = member.guild.roles.cache.get('1246657656270356542');
+	await member.roles.add(role);
+});
 
 client.login(token);
