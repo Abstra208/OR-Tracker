@@ -1,6 +1,5 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { log } = require('node:console');
 const { token } = require('./config.json');
 const { Client, Collection, Events, GatewayIntentBits, ActivityType } = require('discord.js');
 const records = require('./commands/utility/records');
