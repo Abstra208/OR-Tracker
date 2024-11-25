@@ -487,7 +487,11 @@ module.exports = {
                 await interaction.showModal(editRecordModal);
             }
             if (selectedValue === "deleteRecord"){
-                await interaction.showModal(deleteRecordModal);
+                if (permission.admin.includes(interaction.user.id)) {
+                    await interaction.showModal(deleteRecordModal);
+                } else {
+                    await interaction.reply({ content: "You do not have permission to delete records.", ephemeral: true });
+                }
             }
             if (selectedValue === "listRecords"){
                 const snapshot = await get(child(ref(db), '/records'));
