@@ -76,8 +76,22 @@ client.on('guildCreate', async guild => {
 	});
 });
 client.on('guildMemberAdd', async member => {
-	const role = member.guild.roles.cache.get('1246657656270356542');
-	await member.roles.add(role);
+	const targetGuildId = '1246657656270356541';
+	const roleId = '1246657656270356542';
+
+	try {
+		if (member.guild.id === targetGuildId) {
+			const role = member.guild.roles.cache.get(roleId);
+			if (role) {
+				await member.roles.add(role);
+				console.log(`Assigned role ${role.name} to user ${member.user.tag}`);
+			} else {
+				console.error(`Role with ID ${roleId} not found in guild ${targetGuildId}`);
+			}
+		}
+	} catch (error) {
+		console.error(error);
+	}
 });
 
 client.login(token);
