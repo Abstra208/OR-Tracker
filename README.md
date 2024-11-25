@@ -16,7 +16,7 @@ You can add OR Tracker to your discord server or as a user app. [Invite OR Track
 
 ![](https://tokei.rs/b1/github/abstra208/or-tracker)
 ![JavaScript](https://img.shields.io/badge/Made%20with-JavaScript-1f425f.svg)
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 
 ## Image
