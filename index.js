@@ -75,6 +75,13 @@ client.on('guildCreate', async guild => {
 		'servers': client.guilds.cache.size
 	});
 });
+client.on('guildDelete', async guild => {
+	const app = getApp();
+	const db = getDatabase(app);
+	await set(ref(db, '/info'), {
+		'servers': client.guilds.cache.size
+	});
+});
 client.on('guildMemberAdd', async member => {
 	const targetGuildId = '1246657656270356541';
 	const roleId = '1246657656270356542';
