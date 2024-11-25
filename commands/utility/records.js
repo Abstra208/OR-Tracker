@@ -187,6 +187,10 @@ module.exports = {
                     .setLabel("List your records")
                     .setValue("listRecords")
                     .setDescription("List your records in the database."),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel("List all records")
+                    .setValue("listAllRecords")
+                    .setDescription("List all records in the database."),
             );
 
         const ToolsRow = new ActionRowBuilder().addComponents(ToolsSelect);
@@ -493,6 +497,23 @@ module.exports = {
                     if (value.owner === interaction.user.id) {
                         recordsFound.push(key);
                     }
+                }
+                if (recordsFound.length > 0) {
+                    for (const key of recordsFound) {
+                        const value = records[key];
+                        ListEmbed.addFields({ name: value.name, value: value.description + '\n' + key });
+                    }
+                } else {
+                    ListEmbed.addFields({ name: 'No records found.', value: 'Try searching with another term.' });
+                }
+                await interaction.reply({ embeds: [ListEmbed], ephemeral: true });
+            }
+            if (selectedValue === "listAllRecords"){
+                const snapshot = await get(child(ref(db), '/records'));
+                const records = snapshot.val();
+                let recordsFound = [];
+                for (const [key, value] of Object.entries(records)) {
+                    recordsFound.push(key);
                 }
                 if (recordsFound.length > 0) {
                     for (const key of recordsFound) {
