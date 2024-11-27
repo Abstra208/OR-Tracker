@@ -47,7 +47,11 @@ module.exports = {
             subcommand
                 .setName('profile')
                 .setDescription("Look into a user's profile.")
-                .addUserOption(option => option.setName('user').setDescription('User to get the profile.').setRequired(false))),
+                .addUserOption(option => option.setName('user').setDescription('User to get the profile.').setRequired(false)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('test')
+                .setDescription('Test command for the bot.')),
 
     generateRandomId: () => {
         return crypto.randomBytes(16).toString('hex');
@@ -71,6 +75,8 @@ module.exports = {
                     await this.help(interaction);
                 } else if (interaction.options.getSubcommand() === 'profile') {
                     await this.profile(interaction);
+                } else if (interaction.options.getSubcommand() === 'test') {
+                    await this.test(interaction);
                 }
             }
         } else if (interaction.isButton()) {
@@ -972,52 +978,65 @@ module.exports = {
         }
     },
     async profile(interaction) {
-        const canvas = createCanvas(700, 250);
-        const ctx = canvas.getContext('2d');
-        const background = await loadImage(path.join(__dirname, 'assets', 'background.png'));
+        if (interaction.isChatInputCommand()) {
+            const canvas = createCanvas(700, 250);
+            const ctx = canvas.getContext('2d');
+            const background = await loadImage(path.join(__dirname, 'assets', 'background.png'));
 
-        const user = interaction.options.getUser('user') || interaction.user;
-        const userfetch = await interaction.client.users.fetch(user.id);
-        const records = (await get(child(ref(db), '/records'))).val();
-        const userrecords = [];
-        for (const [key, value] of Object.entries(records)) {
-            if (value.owner === user.id) {
-                userrecords.push(key);
+            const user = interaction.options.getUser('user') || interaction.user;
+            const userfetch = await interaction.client.users.fetch(user.id);
+            const records = (await get(child(ref(db), '/records'))).val();
+            const userrecords = [];
+            for (const [key, value] of Object.entries(records)) {
+                if (value.owner === user.id) {
+                    userrecords.push(key);
+                }
             }
-        }
 
+            ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+            ctx.font = '48px sans-serif';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(userfetch.username, canvas.width / 2.5, canvas.height / 3.5);
+            ctx.font = '28px sans-serif';
+            ctx.fillText(`ID: ${user.id}`, canvas.width / 2.5, canvas.height / 2.5);
+            ctx.fillText(`Records: ${userrecords.length}`, canvas.width / 2.5, canvas.height / 2);
+            // Draw user avatar as a circle
+            const avatar = await loadImage(userfetch.displayAvatarURL({ format: 'png', size: 512 }));
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(125, 125, 100, 0, Math.PI * 2, true);
+            ctx.closePath();
+            ctx.clip();
+            ctx.drawImage(avatar, 25, 25, 200, 200);
+            ctx.restore();
+
+            const attachment = new AttachmentBuilder(canvas.toBuffer('image/png'), { name: 'profile-image.png' });
+
+            const ProfileEmbed = new EmbedBuilder()
+                .setColor(0x4fcf6d)
+                .setTitle(`Profile of ${user.tag}`)
+                .setThumbnail(userfetch.displayAvatarURL())
+                .addFields(
+                    { name: 'Username:', value: userfetch.username, inline: true },
+                    { name: 'ID:', value: user.id, inline: true },
+                    { name: 'Records:', value: userrecords.length.toString(), inline: true },
+                )
+                .setImage('attachment://profile-image.png')
+                .setTimestamp()
+                .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL()})
+
+            await interaction.reply({ embeds: [ProfileEmbed], files: [attachment] });
+        }
+    },
+    async test(interaction) {
+        canvas = createCanvas(700, 250);
+        ctx = canvas.getContext('2d');
+        const background = await loadImage(path.join(__dirname, 'assets', 'background.png'));
         ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
         ctx.font = '48px sans-serif';
         ctx.fillStyle = '#ffffff';
-        ctx.fillText(userfetch.username, canvas.width / 2.5, canvas.height / 3.5);
-        ctx.font = '28px sans-serif';
-        ctx.fillText(`ID: ${user.id}`, canvas.width / 2.5, canvas.height / 2.5);
-        ctx.fillText(`Records: ${userrecords.length}`, canvas.width / 2.5, canvas.height / 2);
-        // Draw user avatar as a circle
-        const avatar = await loadImage(userfetch.displayAvatarURL({ format: 'png', size: 512 }));
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(125, 125, 100, 0, Math.PI * 2, true);
-        ctx.closePath();
-        ctx.clip();
-        ctx.drawImage(avatar, 25, 25, 200, 200);
-        ctx.restore();
-
-        const attachment = new AttachmentBuilder(canvas.toBuffer('image/png'), { name: 'profile-image.png' });
-
-        const ProfileEmbed = new EmbedBuilder()
-            .setColor(0x4fcf6d)
-            .setTitle(`Profile of ${user.tag}`)
-            .setThumbnail(userfetch.displayAvatarURL())
-            .addFields(
-                { name: 'Username:', value: userfetch.username, inline: true },
-                { name: 'ID:', value: user.id, inline: true },
-                { name: 'Records:', value: userrecords.length.toString(), inline: true },
-            )
-            .setImage('attachment://profile-image.png')
-            .setTimestamp()
-            .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL()})
-
-        await interaction.reply({ embeds: [ProfileEmbed], files: [attachment] });
+        ctx.fillText('Hello World!', canvas.width / 2.5, canvas.height / 2.5);
+        const attachment = new AttachmentBuilder(canvas.toBuffer('image/png'), { name: 'test-image.png' });
+        await interaction.reply({ content: 'test' });
     }
 };
