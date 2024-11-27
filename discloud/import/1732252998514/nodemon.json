@@ -1,0 +1,5 @@
+{
+    "watch": ["commands", "config.json", "index.js"],
+    "ignore": ["records.json"],
+    "ext": "js,json"
+}

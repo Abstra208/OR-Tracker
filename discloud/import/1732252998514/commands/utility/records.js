@@ -972,7 +972,7 @@ module.exports = {
         }
     },
     async profile(interaction) {
-        const canvas = createCanvas(700, 250);
+        const canvas = createCanvas(800, 400);
         const ctx = canvas.getContext('2d');
         const background = await loadImage(path.join(__dirname, 'assets', 'background.png'));
 
@@ -997,10 +997,10 @@ module.exports = {
         const avatar = await loadImage(userfetch.displayAvatarURL({ format: 'png', size: 512 }));
         ctx.save();
         ctx.beginPath();
-        ctx.arc(125, 125, 100, 0, Math.PI * 2, true);
+        ctx.arc(150, 150, 125, 0, Math.PI * 2, true);
         ctx.closePath();
         ctx.clip();
-        ctx.drawImage(avatar, 25, 25, 200, 200);
+        ctx.drawImage(avatar, 25, 25, 250, 250);
         ctx.restore();
 
         const attachment = new AttachmentBuilder(canvas.toBuffer('image/png'), { name: 'profile-image.png' });
