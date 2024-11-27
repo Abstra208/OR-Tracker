@@ -47,11 +47,7 @@ module.exports = {
             subcommand
                 .setName('profile')
                 .setDescription("Look into a user's profile.")
-                .addUserOption(option => option.setName('user').setDescription('User to get the profile.').setRequired(false)))
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('test')
-                .setDescription('Test command for the bot.')),
+                .addUserOption(option => option.setName('user').setDescription('User to get the profile.').setRequired(false))),
 
     generateRandomId: () => {
         return crypto.randomBytes(16).toString('hex');
@@ -75,8 +71,6 @@ module.exports = {
                     await this.help(interaction);
                 } else if (interaction.options.getSubcommand() === 'profile') {
                     await this.profile(interaction);
-                } else if (interaction.options.getSubcommand() === 'test') {
-                    await this.test(interaction);
                 }
             }
         } else if (interaction.isButton()) {
@@ -1028,15 +1022,4 @@ module.exports = {
             await interaction.reply({ embeds: [ProfileEmbed], files: [attachment] });
         }
     },
-    async test(interaction) {
-        canvas = createCanvas(700, 250);
-        ctx = canvas.getContext('2d');
-        const background = await loadImage(path.join(__dirname, 'assets', 'background.png'));
-        ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-        ctx.font = '48px sans-serif';
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText('Hello World!', canvas.width / 2.5, canvas.height / 2.5);
-        const attachment = new AttachmentBuilder(canvas.toBuffer('image/png'), { name: 'test-image.png' });
-        await interaction.reply({ content: 'test' });
-    }
 };
