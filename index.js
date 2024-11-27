@@ -1,12 +1,13 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { token } = require('./config.json');
 const { Client, Collection, Events, GatewayIntentBits, ActivityType } = require('discord.js');
 const records = require('./commands/utility/records');
 const { getApp } = require('firebase/app');
 const { getDatabase, set, ref } = require('firebase/database');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+const token = process.env.DISCORD_TOKEN;
 
 client.commands = new Collection();
 const foldersPath = path.join(__dirname, 'commands');

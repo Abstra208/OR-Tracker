@@ -1,22 +1,22 @@
 const fs = require('node:fs');
-const { apiKey, authDomain, databaseURL, projectId, storageBucket, messagingSenderId, appId } = require('../../config.json');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder, EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, client, time, TimestampStyles } = require('discord.js');
 const { AttachmentBuilder } = require('discord.js');
 const crypto = require('crypto');
 const path = require('path');
 const { initializeApp } = require('firebase/app');
 const { getDatabase, ref, set, get, child, update, remove } = require('firebase/database');
-const Canvas = require('@napi-rs/canvas');
 const { createCanvas, loadImage } = require('@napi-rs/canvas');
 
+const config = require('../../config');
+
 const firebaseConfig = {
-    apiKey: apiKey,
-    authDomain: authDomain,
-    databaseURL: databaseURL,
-    projectId: projectId,
-    storageBucket: storageBucket,
-    messagingSenderId: messagingSenderId,
-    appId: appId
+    apiKey: config.firebaseApiKey,
+    authDomain: config.firebaseAuthDomain,
+    databaseURL: config.firebaseDatabaseUrl,
+    projectId: config.firebaseProjectId,
+    storageBucket: config.firebaseStorageBucket,
+    messagingSenderId: config.firebaseMessagingSenderId,
+    appId: config.firebaseAppId
 };
 
 const app = initializeApp(firebaseConfig);
