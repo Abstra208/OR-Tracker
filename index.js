@@ -7,7 +7,9 @@ const { getDatabase, set, ref } = require('firebase/database');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-const token = process.env.DISCORD_TOKEN;
+const config = require('./config');
+
+const token = config.discordToken;
 
 client.commands = new Collection();
 const foldersPath = path.join(__dirname, 'commands');
