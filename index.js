@@ -7,7 +7,7 @@ const { getDatabase, set, ref } = require('firebase/database');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-const config = require('./config');
+const config = require('./config.js');
 
 const token = config.discordToken;
 

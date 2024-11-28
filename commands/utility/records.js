@@ -7,7 +7,7 @@ const { initializeApp } = require('firebase/app');
 const { getDatabase, ref, set, get, child, update, remove } = require('firebase/database');
 const { createCanvas, loadImage } = require('@napi-rs/canvas');
 
-const config = require('../../config');
+const config = require('../../config.js');
 
 const firebaseConfig = {
     apiKey: config.firebaseApiKey,

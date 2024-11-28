@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 module.exports = {
     discordClientId: process.env.DISCORD_CLIENT_ID,
     discordToken: process.env.DISCORD_TOKEN,
