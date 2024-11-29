@@ -976,6 +976,7 @@ module.exports = {
             const canvas = createCanvas(700, 250);
             const ctx = canvas.getContext('2d');
             const background = await loadImage(path.join(__dirname, 'assets', 'background.png'));
+            const font = path.join(__dirname, 'assets', 'font.ttf');
 
             const user = interaction.options.getUser('user') || interaction.user;
             const userfetch = await interaction.client.users.fetch(user.id);
@@ -988,10 +989,10 @@ module.exports = {
             }
 
             ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-            ctx.font = '48px ./assets/font.ttf';
+            ctx.font = `48px ${font}`;
             ctx.fillStyle = '#ffffff';
             ctx.fillText(userfetch.username.charAt(0).toUpperCase() + userfetch.username.slice(1), canvas.width / 2.5, canvas.height / 3.5);
-            ctx.font = '28px ./assets/font.ttf';
+            ctx.font = `28px ${font}`;
             ctx.fillText(`ID: ${user.id}`, canvas.width / 2.5, canvas.height / 2.2);
             ctx.fillText(`Records: ${userrecords.length}`, canvas.width / 2.5, canvas.height / 1.8);
             // Draw user avatar as a circle
