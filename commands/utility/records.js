@@ -976,7 +976,7 @@ module.exports = {
             const canvas = createCanvas(700, 250);
             const ctx = canvas.getContext('2d');
             const background = await loadImage(path.join(__dirname, 'assets', 'background.png'));
-            const font = path.join(__dirname, 'assets', 'font.ttf');
+            const font = path.resolve(__dirname, 'assets', 'font.ttf');
 
             const user = interaction.options.getUser('user') || interaction.user;
             const userfetch = await interaction.client.users.fetch(user.id);
