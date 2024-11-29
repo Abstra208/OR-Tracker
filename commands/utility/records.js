@@ -988,10 +988,10 @@ module.exports = {
             }
 
             ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-            ctx.font = '48px assets/font.ttf';
+            ctx.font = '48px ./assets/font.ttf';
             ctx.fillStyle = '#ffffff';
             ctx.fillText(userfetch.username.charAt(0).toUpperCase() + userfetch.username.slice(1), canvas.width / 2.5, canvas.height / 3.5);
-            ctx.font = '28px assets/font.ttf';
+            ctx.font = '28px ./assets/font.ttf';
             ctx.fillText(`ID: ${user.id}`, canvas.width / 2.5, canvas.height / 2.2);
             ctx.fillText(`Records: ${userrecords.length}`, canvas.width / 2.5, canvas.height / 1.8);
             // Draw user avatar as a circle
