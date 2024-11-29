@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const path = require('path');
 const { initializeApp } = require('firebase/app');
 const { getDatabase, ref, set, get, child, update, remove } = require('firebase/database');
-const { createCanvas, loadImage } = require('@napi-rs/canvas');
+const { createCanvas, loadImage, GlobalFonts } = require('@napi-rs/canvas');
 
 const config = require('../../config.js');
 
@@ -973,10 +973,11 @@ module.exports = {
     },
     async profile(interaction) {
         if (interaction.isChatInputCommand()) {
+            GlobalFonts.registerFromPath(path.join(__dirname, 'assets', 'fonts', 'Bold.ttf'), 'Bold');
+            GlobalFonts.registerFromPath(path.join(__dirname, 'assets', 'fonts', 'SemiBold.ttf'), 'Semi');
             const canvas = createCanvas(700, 250);
             const ctx = canvas.getContext('2d');
             const background = await loadImage(path.join(__dirname, 'assets', 'background.png'));
-            const font = path.resolve(__dirname, 'assets', 'font.ttf');
 
             const user = interaction.options.getUser('user') || interaction.user;
             const userfetch = await interaction.client.users.fetch(user.id);
@@ -989,10 +990,10 @@ module.exports = {
             }
 
             ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-            ctx.font = `48px ${font}`;
+            ctx.font = `48px Bold`;
             ctx.fillStyle = '#ffffff';
             ctx.fillText(userfetch.username.charAt(0).toUpperCase() + userfetch.username.slice(1), canvas.width / 2.5, canvas.height / 3.5);
-            ctx.font = `28px ${font}`;
+            ctx.font = `28px Semi`;
             ctx.fillText(`ID: ${user.id}`, canvas.width / 2.5, canvas.height / 2.2);
             ctx.fillText(`Records: ${userrecords.length}`, canvas.width / 2.5, canvas.height / 1.8);
             // Draw user avatar as a circle
@@ -1024,7 +1025,7 @@ module.exports = {
                     ctx.closePath();
                     ctx.fillStyle = 'rgba(0, 0, 255, 0.65)';
                     ctx.fill();
-                    ctx.font = '30px assets/font.ttf';
+                    ctx.font = '30px Bold';
                     ctx.fillStyle = '#ffffff';
                     ctx.fillText('Beta', 145, 215);
                     ctx.restore();
