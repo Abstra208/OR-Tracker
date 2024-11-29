@@ -988,12 +988,12 @@ module.exports = {
             }
 
             ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-            ctx.font = '48px sans-serif';
+            ctx.font = '48px assets/font.ttf';
             ctx.fillStyle = '#ffffff';
-            ctx.fillText(userfetch.username, canvas.width / 2.5, canvas.height / 3.5);
-            ctx.font = '28px sans-serif';
-            ctx.fillText(`ID: ${user.id}`, canvas.width / 2.5, canvas.height / 2.5);
-            ctx.fillText(`Records: ${userrecords.length}`, canvas.width / 2.5, canvas.height / 2);
+            ctx.fillText(userfetch.username.charAt(0).toUpperCase() + userfetch.username.slice(1), canvas.width / 2.5, canvas.height / 3.5);
+            ctx.font = '28px assets/font.ttf';
+            ctx.fillText(`ID: ${user.id}`, canvas.width / 2.5, canvas.height / 2.2);
+            ctx.fillText(`Records: ${userrecords.length}`, canvas.width / 2.5, canvas.height / 1.8);
             // Draw user avatar as a circle
             const avatar = await loadImage(userfetch.displayAvatarURL({ format: 'png', size: 512 }));
             ctx.save();
@@ -1003,6 +1003,32 @@ module.exports = {
             ctx.clip();
             ctx.drawImage(avatar, 25, 25, 200, 200);
             ctx.restore();
+
+            const userSnapshot = await get(child(ref(db), `users/${user.id}`));
+            const userSnapshotVal = userSnapshot.val();
+            if (userSnapshot.exists()) {
+                if (userSnapshotVal.badges.includes('beta')) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.beginPath();
+                    ctx.moveTo(125 + 10, 180);
+                    ctx.lineTo(125 + 100 - 10, 180);
+                    ctx.quadraticCurveTo(125 + 100, 180, 125 + 100, 180 + 10);
+                    ctx.lineTo(125 + 100, 180 + 50 - 10);
+                    ctx.quadraticCurveTo(125 + 100, 180 + 50, 125 + 100 - 10, 180 + 50);
+                    ctx.lineTo(125 + 10, 180 + 50);
+                    ctx.quadraticCurveTo(125, 180 + 50, 125, 180 + 50 - 10);
+                    ctx.lineTo(125, 180 + 10);
+                    ctx.quadraticCurveTo(125, 180, 125 + 10, 180);
+                    ctx.closePath();
+                    ctx.fillStyle = 'rgba(0, 0, 255, 0.65)';
+                    ctx.fill();
+                    ctx.font = '30px assets/font.ttf';
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillText('Beta', 145, 215);
+                    ctx.restore();
+                }
+            }
 
             const attachment = new AttachmentBuilder(canvas.toBuffer('image/png'), { name: 'profile-image.png' });
 
