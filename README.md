@@ -12,7 +12,7 @@ OR Tracker is a bot designed specifically for the community of the OR server, fa
 
 You can add OR Tracker to your discord server or as a user app. [Invite OR Tracker](https://discord.com/oauth2/authorize?client_id=1294873348387635230)
 
-Wamt to use the docker, check it [here](https://hub.docker.com/r/abstra208/clockbox/tags)
+Want to use the docker? Check it [here](https://hub.docker.com/r/abstra208/clockbox/tags)
 
 # Information
 
