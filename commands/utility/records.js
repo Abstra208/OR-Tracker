@@ -117,18 +117,18 @@ module.exports = {
     async help(interaction) {
         const HelpEmbed = new EmbedBuilder()
             .setColor(0x4fcf6d)
-            .setTitle(`Help for records`)
-            .setDescription(`Here are some useful links and informations to help you get started with the bot.`)
+            .setTitle('Help for Records')
+            .setDescription('Here are some useful links and information to help you get started with the bot.')
             .setTimestamp()
             .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
             .addFields(
-                { name: '/record search', value: 'Search for a record in the database.', inline: true },
-                { name: '/record user', value: 'Look into the record of a user.', inline: true },
-                { name: '/record tools', value: 'Multiple tools to manage the database.', inline: true },
-                { name: '/record register', value: 'Register a new record or update one. (Admin verification is required)', inline: true },
-                { name: '/record help', value: 'Provide links and informations to help you get started with the bot.' },
-                { name: '/record profile', value: "Look into a user's profile." },
-            )
+                { name: '/record search', value: 'Search for records in the database.', inline: true },
+                { name: '/record user', value: 'View the records of a user.', inline: true },
+                { name: '/record tools', value: 'Access various tools to manage the database.', inline: true },
+                { name: '/record register', value: 'Register a new record or update an existing one.', inline: true },
+                { name: '/record help', value: 'Get links and information to help you get started with the bot.', inline: true },
+                { name: '/record profile', value: "View a user's profile.", inline: true },
+            );
         const WebsiteButton = new ButtonBuilder()
             .setLabel('OR Tracker Website')
             .setStyle(ButtonStyle.Link)
