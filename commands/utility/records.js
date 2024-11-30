@@ -47,7 +47,12 @@ module.exports = {
             subcommand
                 .setName('profile')
                 .setDescription("Look into a user's profile.")
-                .addUserOption(option => option.setName('user').setDescription('User to get the profile.').setRequired(false))),
+                .addUserOption(option => option.setName('user').setDescription('User to get the profile.').setRequired(false)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('user')
+                .setDescription('Look into the record of a user.')
+                .addUserOption(option => option.setName('user').setDescription('User to get the record.').setRequired(true))),
 
     generateRandomId: () => {
         return crypto.randomBytes(16).toString('hex');
@@ -71,6 +76,8 @@ module.exports = {
                     await this.help(interaction);
                 } else if (interaction.options.getSubcommand() === 'profile') {
                     await this.profile(interaction);
+                } else if (interaction.options.getSubcommand() === 'user') {
+                    await this.user(interaction);
                 }
             }
         } else if (interaction.isButton()) {
@@ -116,9 +123,11 @@ module.exports = {
             .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
             .addFields(
                 { name: '/record search', value: 'Search for a record in the database.', inline: true },
+                { name: '/record user', value: 'Look into the record of a user.', inline: true },
                 { name: '/record tools', value: 'Multiple tools to manage the database.', inline: true },
                 { name: '/record register', value: 'Register a new record or update one. (Admin verification is required)', inline: true },
                 { name: '/record help', value: 'Provide links and informations to help you get started with the bot.' },
+                { name: '/record profile', value: "Look into a user's profile." },
             )
         const WebsiteButton = new ButtonBuilder()
             .setLabel('OR Tracker Website')
@@ -1048,4 +1057,30 @@ module.exports = {
             await interaction.reply({ embeds: [ProfileEmbed], files: [attachment] });
         }
     },
+    async user(interaction) {
+        const user = interaction.options.getUser('user');
+        const userfetch = await interaction.client.users.fetch(user.id);
+        const records = (await get(child(ref(db), '/records'))).val();
+        const userrecords = [];
+        for (const [key, value] of Object.entries(records)) {
+            if (value.owner === user.id) {
+                userrecords.push(key);
+            }
+        }
+
+        const UserEmbed = new EmbedBuilder()
+            .setColor(0x4fcf6d)
+            .setTitle(`Records of ${user.tag}`)
+            .setThumbnail(userfetch.displayAvatarURL())
+            .setTimestamp()
+            .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL()})
+
+        if (userrecords.length > 0) {
+            for (const key of userrecords) {
+                const value = records[key];
+                UserEmbed.addFields({ name: value.name, value: value.description + '\n' + key });
+            }
+        }
+        await interaction.reply({ embeds: [UserEmbed] });
+    }
 };
