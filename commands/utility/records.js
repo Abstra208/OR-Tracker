@@ -134,11 +134,9 @@ module.exports = {
     async search(interaction) {
         const Recordsnapshot = await get(child(ref(db), '/records'));
         const records = Recordsnapshot.val();
-        Permissionsnapshot = await get(child(ref(db), '/permission'));
-        const permission = Permissionsnapshot.val();
 
         if (interaction.isChatInputCommand()) {
-            const record = interaction.options.getString('record');
+            const record = interaction.options.getString('record').toLowerCase();
             const SearchEmbed = new EmbedBuilder()
                 .setColor(0x4fcf6d)
                 .setTitle(`Results for records`)
