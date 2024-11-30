@@ -333,23 +333,27 @@ module.exports = {
                 await interaction.showModal(AddDescriptionModal);
             }
             if (interaction.customId === "addRecord") {
-                const UploadEmbed = new EmbedBuilder()
-                    .setColor(0x4fcf6d)
-                    .setTitle(`Add a record`)
-                    .setDescription(`Adding record to database...`)
-                    .setTimestamp()
-                    .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
-                await interaction.update({ embeds: [UploadEmbed], components: [] });
-                const name = interaction.message.embeds[0].fields[0].value;
-                const description = interaction.message.embeds[0].fields[1].value;
-                const id = this.generateRandomId();
-                await set(ref(db, 'records/' + id), {
-                    name: name,
-                    description: description,
-                    owner: interaction.user.id
-                });
-                UploadEmbed.setDescription(`Record ${name} has been added to the database with ID:\n${id}.`);
-                await interaction.editReply({ embeds: [UploadEmbed], components: [] });
+                if (permission.admin.includes(interaction.user.id)) {
+                    const UploadEmbed = new EmbedBuilder()
+                        .setColor(0x4fcf6d)
+                        .setTitle(`Add a record`)
+                        .setDescription(`Adding record to database...`)
+                        .setTimestamp()
+                        .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
+                    await interaction.update({ embeds: [UploadEmbed], components: [] });
+                    const name = interaction.message.embeds[0].fields[0].value;
+                    const description = interaction.message.embeds[0].fields[1].value;
+                    const id = this.generateRandomId();
+                    await set(ref(db, 'records/' + id), {
+                        name: name,
+                        description: description,
+                        owner: interaction.user.id
+                    });
+                    UploadEmbed.setDescription(`Record ${name} has been added to the database with ID:\n${id}.`);
+                    await interaction.editReply({ embeds: [UploadEmbed], components: [] });                    
+                } else {
+                    await interaction.reply({ content: "You do not have permission to add records.", ephemeral: true });
+                }
             }
             if (interaction.customId === "modifyRecord"){
                 const EditEmbed = new EmbedBuilder()
@@ -461,22 +465,45 @@ module.exports = {
             }
             if (interaction.customId === "deleteRecordModal") {
                 const id = interaction.fields.getTextInputValue("id");
-    
-                const DeleteEmbedModal = new EmbedBuilder()
-                    .setColor(0x4fcf6d)
-                    .setTitle(`Delete a record`)
-                    .setDescription(`Deleting record from database...`)
-                    .setTimestamp()
-                    .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
-    
-                await interaction.reply({ embeds: [DeleteEmbedModal], ephemeral: true });
-                if (records === null) {
-                    DeleteEmbedModal.setDescription(`No record with id: *${id}* was found.`);
-                    await interaction.editReply({ embeds: [DeleteEmbedModal], ephemeral: true });
+
+                if (!permission.admin.includes(interaction.user.id)) {
+                    if (records[id].owner !== interaction.user.id) {
+                        const DeleteEmbedModal = new EmbedBuilder()
+                            .setColor(0x4fcf6d)
+                            .setTitle(`Delete a record`)
+                            .setDescription(`Deleting record from database...`)
+                            .setTimestamp()
+                            .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
+            
+                        await interaction.reply({ embeds: [DeleteEmbedModal], ephemeral: true });
+                        if (records === null) {
+                            DeleteEmbedModal.setDescription(`No record with id: *${id}* was found.`);
+                            await interaction.editReply({ embeds: [DeleteEmbedModal], ephemeral: true });
+                        } else {
+                            DeleteEmbedModal.setDescription(`Record ${records[id].name} (${id}) has been deleted from the database.`);
+                            await remove(ref(db, 'records/' + id));
+                            await interaction.editReply({ embeds: [DeleteEmbedModal], ephemeral: true });
+                        }
+                    } else {
+                        await interaction.reply({ content: "You do not have permission to delete this record.", ephemeral: true });
+                    }
                 } else {
-                    DeleteEmbedModal.setDescription(`Record ${records[id].name} (${id}) has been deleted from the database.`);
-                    await remove(ref(db, 'records/' + id));
-                    await interaction.editReply({ embeds: [DeleteEmbedModal], ephemeral: true });
+                    const DeleteEmbedModal = new EmbedBuilder()
+                        .setColor(0x4fcf6d)
+                        .setTitle(`Delete a record`)
+                        .setDescription(`Deleting record from database...`)
+                        .setTimestamp()
+                        .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
+        
+                    await interaction.reply({ embeds: [DeleteEmbedModal], ephemeral: true });
+                    if (records === null) {
+                        DeleteEmbedModal.setDescription(`No record with id: *${id}* was found.`);
+                        await interaction.editReply({ embeds: [DeleteEmbedModal], ephemeral: true });
+                    } else {
+                        DeleteEmbedModal.setDescription(`Record ${records[id].name} (${id}) has been deleted from the database.`);
+                        await remove(ref(db, 'records/' + id));
+                        await interaction.editReply({ embeds: [DeleteEmbedModal], ephemeral: true });
+                    }
                 }
             }
             if (interaction.customId === "searchRecordModal") {
