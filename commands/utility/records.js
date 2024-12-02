@@ -1,5 +1,5 @@
 const fs = require('node:fs');
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder, EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, client, time, TimestampStyles } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder, EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, client, time, TimestampStyles, User } = require('discord.js');
 const { AttachmentBuilder } = require('discord.js');
 const crypto = require('crypto');
 const path = require('path');
@@ -1084,6 +1084,7 @@ module.exports = {
                 .setTimestamp()
                 .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL()})
 
+            ProfileEmbed.addFields({ name: 'Want to see more?', value: `[${userfetch.username}'s profil on ortracker.app](https://ortracker.app/user/${userfetch.id})` })
             await interaction.reply({ embeds: [ProfileEmbed], files: [attachment] });
         }
     },
@@ -1111,6 +1112,7 @@ module.exports = {
                 UserEmbed.addFields({ name: value.name, value: value.description + '\n' + key });
             }
         }
+        UserEmbed.addFields({ name: 'Want to see more?', value: `[${userfetch.username}'s profil on ortracker.app](https://ortracker.app/user/${userfetch.id})` });
         await interaction.reply({ embeds: [UserEmbed] });
     }
 };
