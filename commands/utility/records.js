@@ -1026,6 +1026,12 @@ module.exports = {
                 }
             }
 
+            await update(ref(db, 'users/' + userfetch.id), {
+                username: userfetch.tag,
+                avatar: userfetch.displayAvatarURL(),
+                id: userfetch.id,
+            });
+
             ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
             ctx.font = `48px Bold`;
             ctx.fillStyle = '#ffffff';
@@ -1043,10 +1049,10 @@ module.exports = {
             ctx.drawImage(avatar, 25, 25, 200, 200);
             ctx.restore();
 
-            const userSnapshot = await get(child(ref(db), `users/${user.id}`));
+            const userSnapshot = await get(child(ref(db), `users/${userfetch.id}`));
             const userSnapshotVal = userSnapshot.val();
             if (userSnapshot.exists()) {
-                if (userSnapshotVal.badges.includes('beta')) {
+                if (userSnapshotVal.badges && userSnapshotVal.badges.includes('beta')) {
                     ctx.save();
                     ctx.beginPath();
                     ctx.beginPath();
