@@ -60,8 +60,10 @@ module.exports = {
 
     async execute(interaction) {
         if (interaction.isChatInputCommand()) {
-            // Add beta badge to user **REMOVE WHEN BETA IS OVER**
             await update(ref(db, 'users/' + interaction.user.id), {
+                name: interaction.user.tag,
+                image: interaction.user.displayAvatarURL(),
+                // Add beta badge to user **REMOVE WHEN BETA IS OVER**
                 badges: [ 'beta' ],
             });
 
@@ -554,8 +556,8 @@ module.exports = {
                 const snapshot = await get(child(ref(db), '/records'));
                 const records = snapshot.val();
                 let recordsFound = [];
-                for (const [key, value] of Object.entries(records)) {
-                    if (value.owner === interaction.user.id) {
+                if (value.owner === interaction.user.id) {
+                        for (const [key, value] of Object.entries(records)) {
                         recordsFound.push(key);
                     }
                 }
