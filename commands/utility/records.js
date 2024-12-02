@@ -63,6 +63,7 @@ module.exports = {
             await update(ref(db, 'users/' + interaction.user.id), {
                 username: interaction.user.tag,
                 avatar: interaction.user.displayAvatarURL(),
+                id: interaction.user.id,
                 // Add beta badge to user **REMOVE WHEN BETA IS OVER**
                 badges: [ 'beta' ],
             });
