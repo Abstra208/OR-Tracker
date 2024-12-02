@@ -62,7 +62,6 @@ module.exports = {
         if (interaction.isChatInputCommand()) {
             await update(ref(db, 'users/' + interaction.user.id), {
                 username: interaction.user.tag,
-                disciminator: interaction.user.discriminator,
                 image: interaction.user.displayAvatarURL(),
                 // Add beta badge to user **REMOVE WHEN BETA IS OVER**
                 badges: [ 'beta' ],
