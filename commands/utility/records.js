@@ -52,7 +52,13 @@ module.exports = {
             subcommand
                 .setName('user')
                 .setDescription('Look into the record of a user.')
-                .addUserOption(option => option.setName('user').setDescription('User to get the record.').setRequired(true))),
+                .addUserOption(option => option.setName('user').setDescription('User to get the record.').setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('info')
+                .setDescription('Get informations about a record.')
+                .addStringOption(option => option.setName('id').setDescription('ID from record to get.').setRequired(true))),
+
 
     generateRandomId: () => {
         return crypto.randomBytes(16).toString('hex');
@@ -81,6 +87,8 @@ module.exports = {
                     await this.profile(interaction);
                 } else if (interaction.options.getSubcommand() === 'user') {
                     await this.user(interaction);
+                } else if (interaction.options.getSubcommand() === 'info') {
+                    await this.info(interaction);
                 }
             }
         } else if (interaction.isButton()) {
@@ -1120,5 +1128,41 @@ module.exports = {
         }
         UserEmbed.addFields({ name: 'Want to see more?', value: `[${userfetch.username}'s profil on ortracker.app](https://ortracker.app/user/${userfetch.id})` });
         await interaction.reply({ embeds: [UserEmbed] });
+    },
+    async info(interaction) {
+        const id = interaction.options.getString('id');
+        const snapshotRecord = await get(child(ref(db), '/records/' + id));
+        if (!snapshotRecord.exists()) {
+            await interaction.reply({ content: `No record with id: *${id}* was found.`, ephemeral: true });
+        } else {
+            const record = snapshotRecord.val();
+            const snapshotUser = await get(child(ref(db), '/users/' + record.owner));
+            const user = snapshotUser.val();
+            const owner = await interaction.client.users.fetch(user.id);
+
+            if (record.link === undefined) {
+                await update(ref(db, 'records/' + id), {
+                    link: 'No proof provided.'
+                });
+                record.link = 'No proof provided.';
+            }
+
+            const InfoEmbed = new EmbedBuilder()
+                .setColor(0x4fcf6d)
+                .setTitle(`Record ${record.name}`)
+                .addFields(
+                    { name: 'Name:', value: record.name, inline: true },
+                    { name: 'Owner:', value: `<@!${owner.id}>`, inline: true },
+                    { name: 'Description:', value: record.description },
+                    { name: 'Proof:', value: record.link },
+                    { name: 'ID:', value: id },
+                    { name: 'Didn\'t find what you were looking for?', value: `[See more on ortracker.app](https://ortracker.app/records/${id})` }
+                )
+                .setThumbnail(owner.displayAvatarURL())
+                .setTimestamp()
+                .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
+
+            await interaction.reply({ embeds: [InfoEmbed] });
+        }
     }
 };
