@@ -67,7 +67,9 @@ module.exports = {
     async execute(interaction) {
         if (interaction.isChatInputCommand()) {
             const badges = (await get(child(ref(db), 'users/' + interaction.user.id + '/badges'))).val();
-            badges.push('beta');
+            if (!badges.includes('beta')) {
+                badges.push('beta');
+            }
             await update(ref(db, 'users/' + interaction.user.id), {
                 username: interaction.user.tag,
                 avatar: interaction.user.displayAvatarURL(),
