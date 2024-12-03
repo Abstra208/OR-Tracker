@@ -66,7 +66,7 @@ module.exports = {
 
     async execute(interaction) {
         if (interaction.isChatInputCommand()) {
-            await update(ref(db, 'users/' + interaction.user.id), {
+            await set(ref(db, 'users/' + interaction.user.id), {
                 username: interaction.user.tag,
                 avatar: interaction.user.displayAvatarURL(),
                 id: interaction.user.id,
@@ -1034,7 +1034,7 @@ module.exports = {
                 }
             }
 
-            await update(ref(db, 'users/' + userfetch.id), {
+            await set(ref(db, 'users/' + userfetch.id), {
                 username: userfetch.tag,
                 avatar: userfetch.displayAvatarURL(),
                 id: userfetch.id,
