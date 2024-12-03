@@ -67,6 +67,8 @@ module.exports = {
     async execute(interaction) {
         if (interaction.isChatInputCommand()) {
             const badges = (await get(child(ref(db), 'users/' + interaction.user.id + '/badges'))).val();
+            
+            // Add beta badge to user **REMOVE WHEN BETA IS OVER**
             if (!badges.includes('beta')) {
                 badges.push('beta');
             }
@@ -74,7 +76,6 @@ module.exports = {
                 username: interaction.user.tag,
                 avatar: interaction.user.displayAvatarURL(),
                 id: interaction.user.id,
-                // Add beta badge to user **REMOVE WHEN BETA IS OVER**
                 badges: badges
             });
 
