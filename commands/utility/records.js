@@ -66,7 +66,7 @@ module.exports = {
 
     async execute(interaction) {
         if (interaction.isChatInputCommand()) {
-            await set(ref(db, 'users/' + interaction.user.id), {
+            await update(ref(db, 'users/' + interaction.user.id), {
                 username: interaction.user.tag,
                 avatar: interaction.user.displayAvatarURL(),
                 id: interaction.user.id,
@@ -1034,10 +1034,12 @@ module.exports = {
                 }
             }
 
-            await set(ref(db, 'users/' + userfetch.id), {
+            const badges = (await get(child(ref(db), 'users/' + userfetch.id + '/badges'))).val();
+            await update(ref(db, 'users/' + userfetch.id), {
                 username: userfetch.tag,
                 avatar: userfetch.displayAvatarURL(),
                 id: userfetch.id,
+                badges: badges
             });
 
             ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
