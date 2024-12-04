@@ -67,7 +67,7 @@ module.exports = {
     async execute(interaction) {
         if (interaction.isChatInputCommand()) {
             const badges = (await get(child(ref(db), 'users/' + interaction.user.id + '/badges'))).val();
-            
+
             // Add beta badge to user **REMOVE WHEN BETA IS OVER**
             if (!badges.includes('beta')) {
                 badges.push('beta');
@@ -198,7 +198,15 @@ module.exports = {
         const ToolsEmbed = new EmbedBuilder()
             .setColor(0x4fcf6d)
             .setTitle(`Tools for records`)
-            .setFields({ name: 'Tools:', value: 'Select a tool from the dropdown menu below.' })
+            .setDescription(`Here are some tools to manage the database.`)
+            .setFields(
+                { name: 'Register a record', value: 'Register a record to the database.', inline: true },
+                { name: 'Search for a record', value: 'Search for a record in the database.', inline: true },
+                { name: 'Edit a record', value: 'Edit a record in the database.', inline: true },
+                { name: 'Delete a record', value: 'Delete a record from the database.', inline: true },
+                { name: 'List your records', value: 'List your records in the database.', inline: true },
+                { name: 'List all records', value: 'List all records in the database.', inline: true },
+            )
             .setTimestamp()
             .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
 
@@ -207,9 +215,9 @@ module.exports = {
             .setPlaceholder("Select a tool")
             .addOptions(
                 new StringSelectMenuOptionBuilder()
-                    .setLabel("Add a record")
+                    .setLabel("Register a record")
                     .setValue("addRecord")
-                    .setDescription("Add a record to the database."),
+                    .setDescription("Register a record to the database."),
                 new StringSelectMenuOptionBuilder()
                     .setLabel("Search for a record")
                     .setValue("searchRecord")
