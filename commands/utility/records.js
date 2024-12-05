@@ -201,7 +201,6 @@ module.exports = {
             .setDescription(`Here are some tools to manage the database.`)
             .setFields(
                 { name: 'Register a record', value: 'Register a record to the database.', inline: true },
-                { name: 'Search for a record', value: 'Search for a record in the database.', inline: true },
                 { name: 'Edit a record', value: 'Edit a record in the database.', inline: true },
                 { name: 'Delete a record', value: 'Delete a record from the database.', inline: true },
                 { name: 'List your records', value: 'List your records in the database.', inline: true },
@@ -530,87 +529,18 @@ module.exports = {
                     }
                 }
             }
-            if (interaction.customId === "searchRecordModal") {
-                const name = interaction.fields.getTextInputValue("name");
-                const snapshot = await get(child(ref(db), '/records'));
-                const records = snapshot.val();
-                let recordsFound = [];
-                for (const [key, value] of Object.entries(records)) {
-                    if (value.name.includes(name)) {
-                        recordsFound.push(key);
-                    }
-                }
-                const SearchEmbed = new EmbedBuilder()
+        } else if (interaction.isStringSelectMenu) {
+            if (interaction.customId === "listAllRecords"){
+                const ListEmbed = new EmbedBuilder()
                     .setColor(0x4fcf6d)
-                    .setTitle(`Results for records`)
-                    .setDescription(`Here are the results for record called: ${name}.`)
+                    .setTitle(`List all records`)
+                    .setDescription(`To list all records, go to (ortracker.app)[https://ortracker.app/records].`)
                     .setTimestamp()
                     .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
-                if (recordsFound.length > 0) {
-                    for (const key of recordsFound) {
-                        const value = records[key];
-                        SearchEmbed.addFields({ name: value.name, value: value.description + '\n' + key });
-                    }
-                } else {
-                    SearchEmbed.addFields({ name: 'No records found.', value: 'Try searching with another term.' });
-                }
-                await interaction.reply({ embeds: [SearchEmbed], ephemeral: true });
+
+                await interaction.reply({ embeds: ListEmbed, ephemeral: true });
             }
-        } else if (interaction.isStringSelectMenu()) {
-            const selectedValue = interaction.values[0];
-            if (selectedValue === "addRecord"){
-                await interaction.showModal(addRecordModal);
-            }
-            if (selectedValue === "searchRecord"){
-                await interaction.showModal(searchRecordModal);
-            }
-            if (selectedValue === "editRecord"){
-                await interaction.showModal(editRecordModal);
-            }
-            if (selectedValue === "deleteRecord"){
-                if (permission.admin.includes(interaction.user.id)) {
-                    await interaction.showModal(deleteRecordModal);
-                } else {
-                    await interaction.reply({ content: "You do not have permission to delete records.", ephemeral: true });
-                }
-            }
-            if (selectedValue === "listRecords"){
-                const snapshot = await get(child(ref(db), '/records'));
-                const records = snapshot.val();
-                let recordsFound = [];
-                if (value.owner === interaction.user.id) {
-                        for (const [key, value] of Object.entries(records)) {
-                        recordsFound.push(key);
-                    }
-                }
-                if (recordsFound.length > 0) {
-                    for (const key of recordsFound) {
-                        const value = records[key];
-                        ListEmbed.addFields({ name: value.name, value: value.description + '\n' + key });
-                    }
-                } else {
-                    ListEmbed.addFields({ name: 'No records found.', value: 'Try searching with another term.' });
-                }
-                await interaction.reply({ embeds: [ListEmbed], ephemeral: true });
-            }
-            if (selectedValue === "listAllRecords"){
-                const snapshot = await get(child(ref(db), '/records'));
-                const records = snapshot.val();
-                let recordsFound = [];
-                for (const [key, value] of Object.entries(records)) {
-                    recordsFound.push(key);
-                }
-                if (recordsFound.length > 0) {
-                    for (const key of recordsFound) {
-                        const value = records[key];
-                        ListEmbed.addFields({ name: value.name, value: value.description + '\n' + key });
-                    }
-                } else {
-                    ListEmbed.addFields({ name: 'No records found.', value: 'Try searching with another term.' });
-                }
-                await interaction.reply({ embeds: [ListEmbed], ephemeral: true });
-            }
-            if (selectedValue === "exportRecords"){
+            if (interaction.customId === "exportRecords"){
                 const snapshot = await get(child(ref(db), '/permission'));
                 const permission = snapshot.val();
                 const admin = permission.admin;
