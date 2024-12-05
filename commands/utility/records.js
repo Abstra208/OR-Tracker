@@ -1043,7 +1043,7 @@ module.exports = {
                 .setTimestamp()
                 .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL()})
 
-            ProfileEmbed.addFields({ name: 'Want to see more?', value: `[${userfetch.username}'s profil on ortracker.app](https://ortracker.app/user/${userfetch.id})` })
+            ProfileEmbed.addFields({ name: 'Want to see more?', value: `[${userfetch.username}'s profil on ortracker.app](https://ortracker.app/users/${userfetch.id})` })
             await interaction.reply({ embeds: [ProfileEmbed], files: [attachment] });
         }
     },
@@ -1071,7 +1071,7 @@ module.exports = {
                 UserEmbed.addFields({ name: value.name, value: value.description + '\n' + key });
             }
         }
-        UserEmbed.addFields({ name: 'Want to see more?', value: `[${userfetch.username}'s profil on ortracker.app](https://ortracker.app/user/${userfetch.id})` });
+        UserEmbed.addFields({ name: 'Want to see more?', value: `[${userfetch.username}'s profil on ortracker.app](https://ortracker.app/users/${userfetch.id})` });
         await interaction.reply({ embeds: [UserEmbed] });
     },
     async info(interaction) {
