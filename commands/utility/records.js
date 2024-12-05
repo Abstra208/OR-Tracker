@@ -217,10 +217,6 @@ module.exports = {
                     .setValue("addRecord")
                     .setDescription("Register a record to the database."),
                 new StringSelectMenuOptionBuilder()
-                    .setLabel("Search for a record")
-                    .setValue("searchRecord")
-                    .setDescription("Search for a record in the database."),
-                new StringSelectMenuOptionBuilder()
                     .setLabel("Edit a record")
                     .setValue("editRecord")
                     .setDescription("Edit a record in the database."),
@@ -255,20 +251,6 @@ module.exports = {
                             .setPlaceholder("Enter the description of the record.")
                             .setStyle(TextInputStyle.Paragraph)
                             .setRequired(true)
-                    ),
-                );
-
-        const searchRecordModal = new ModalBuilder()
-            .setCustomId("searchRecordModal")
-            .setTitle("Search for a record")
-                searchRecordModal.addComponents(
-                    new ActionRowBuilder().addComponents(
-                        new TextInputBuilder()
-                            .setCustomId("name")
-                            .setLabel("Name")
-                            .setPlaceholder("Enter the name of the record.")
-                            .setRequired(true)
-                            .setStyle(TextInputStyle.Short),
                     ),
                 );
 
@@ -528,9 +510,6 @@ module.exports = {
             const selectedValue = interaction.values[0];
             if (selectedValue === "addRecord"){
                 await interaction.showModal(addRecordModal);
-            }
-            if (selectedValue === "searchRecord"){
-                await interaction.showModal(searchRecordModal);
             }
             if (selectedValue === "editRecord"){
                 await interaction.showModal(editRecordModal);
