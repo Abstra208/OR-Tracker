@@ -204,7 +204,6 @@ module.exports = {
                 { name: 'Edit a record', value: 'Edit a record in the database.', inline: true },
                 { name: 'Delete a record', value: 'Delete a record from the database.', inline: true },
                 { name: 'List your records', value: 'List your records in the database.', inline: true },
-                { name: 'List all records', value: 'List all records in the database.', inline: true },
             )
             .setTimestamp()
             .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
@@ -233,10 +232,6 @@ module.exports = {
                     .setLabel("List your records")
                     .setValue("listRecords")
                     .setDescription("List your records in the database."),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel("List all records")
-                    .setValue("listAllRecords")
-                    .setDescription("List all records in the database."),
             );
 
         const ToolsRow = new ActionRowBuilder().addComponents(ToolsSelect);
@@ -529,18 +524,44 @@ module.exports = {
                     }
                 }
             }
-        } else if (interaction.isStringSelectMenu) {
-            if (interaction.customId === "listAllRecords"){
-                const ListEmbed = new EmbedBuilder()
-                    .setColor(0x4fcf6d)
-                    .setTitle(`List all records`)
-                    .setDescription(`To list all records, go to (ortracker.app)[https://ortracker.app/records].`)
-                    .setTimestamp()
-                    .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
-
-                await interaction.reply({ embeds: ListEmbed, ephemeral: true });
+        } else if (interaction.isStringSelectMenu()) {
+            const selectedValue = interaction.values[0];
+            if (selectedValue === "addRecord"){
+                await interaction.showModal(addRecordModal);
             }
-            if (interaction.customId === "exportRecords"){
+            if (selectedValue === "searchRecord"){
+                await interaction.showModal(searchRecordModal);
+            }
+            if (selectedValue === "editRecord"){
+                await interaction.showModal(editRecordModal);
+            }
+            if (selectedValue === "deleteRecord"){
+                if (permission.admin.includes(interaction.user.id)) {
+                    await interaction.showModal(deleteRecordModal);
+                } else {
+                    await interaction.reply({ content: "You do not have permission to delete records.", ephemeral: true });
+                }
+            }
+            if (selectedValue === "listRecords"){
+                const snapshot = await get(child(ref(db), '/records'));
+                const records = snapshot.val();
+                let recordsFound = [];
+                for (const [key, value] of Object.entries(records)) {
+                    if (value.owner === interaction.user.id) {
+                        recordsFound.push(key);
+                    }
+                }
+                if (recordsFound.length > 0) {
+                    for (const key of recordsFound) {
+                        const value = records[key];
+                        ListEmbed.addFields({ name: value.name, value: value.description + '\n' + key });
+                    }
+                } else {
+                    ListEmbed.addFields({ name: 'No records found.', value: 'Try searching with another term.' });
+                }
+                await interaction.reply({ embeds: [ListEmbed], ephemeral: true });
+            }
+            if (selectedValue === "exportRecords"){
                 const snapshot = await get(child(ref(db), '/permission'));
                 const permission = snapshot.val();
                 const admin = permission.admin;
