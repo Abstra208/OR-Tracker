@@ -44,7 +44,7 @@ client.once(Events.ClientReady, readyClient => {
 			status: 'dnd'
 		});
 		activityIndex = (activityIndex + 1) % activities.length;
-	}, 6000);
+	}, 10000);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
