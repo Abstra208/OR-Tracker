@@ -32,10 +32,10 @@ for (const folder of commandFolders) {
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 	console.log(`Serving ${readyClient.guilds.cache.size} servers`);
-    readyClient.user.setPresence({
-        activities: [{ name: '/records', type: ActivityType.Listening }],
-        status: 'dnd'
-    });
+	readyClient.user.setPresence({
+		activities: [{ name: ':link: ortracker.app', type: ActivityType.Watching }],
+		status: 'dnd'
+	});
 });
 
 client.on(Events.InteractionCreate, async interaction => {
