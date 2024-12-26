@@ -33,7 +33,7 @@ client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 	console.log(`Serving ${readyClient.guilds.cache.size} servers`);
 	readyClient.user.setPresence({
-		activities: [{ name: ':link: ortracker.app', type: ActivityType.Watching }],
+		activities: [{ name: 'ortracker.app', type: ActivityType.Watching }],
 		status: 'dnd'
 	});
 });
