@@ -32,10 +32,19 @@ for (const folder of commandFolders) {
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 	console.log(`Serving ${readyClient.guilds.cache.size} servers`);
-	readyClient.user.setPresence({
-		activities: [{ name: 'ortracker.app', type: ActivityType.Watching }],
-		status: 'dnd'
-	});
+	const activities = [
+		{ name: 'ortracker.app', type: ActivityType.Watching },
+		{ name: '/records', type: ActivityType.Listening }
+	];
+	let activityIndex = 0;
+
+	setInterval(() => {
+		readyClient.user.setPresence({
+			activities: [activities[activityIndex]],
+			status: 'dnd'
+		});
+		activityIndex = (activityIndex + 1) % activities.length;
+	}, 6000);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
