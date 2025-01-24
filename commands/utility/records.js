@@ -68,16 +68,24 @@ module.exports = {
         if (interaction.isChatInputCommand()) {
             const badges = (await get(child(ref(db), 'users/' + interaction.user.id + '/badges'))).val();
 
-            // Add beta badge to user **REMOVE WHEN BETA IS OVER**
-            if (!badges.includes('beta')) {
-                badges.push('beta');
+            if (badges === null) {
+                await set(ref(db, 'users/' + interaction.user.id), {
+                    username: interaction.user.tag,
+                    avatar: interaction.user.displayAvatarURL(),
+                    id: interaction.user.id,
+                    badges: ["beta"]
+                });
+            } else {
+                if (!badges.includes('beta')) {
+                    badges.push('beta');
+                }
+                await update(ref(db, 'users/' + interaction.user.id), {
+                    username: interaction.user.tag,
+                    avatar: interaction.user.displayAvatarURL(),
+                    id: interaction.user.id,
+                    badges: badges
+                });
             }
-            await update(ref(db, 'users/' + interaction.user.id), {
-                username: interaction.user.tag,
-                avatar: interaction.user.displayAvatarURL(),
-                id: interaction.user.id,
-                badges: badges
-            });
 
             if (interaction.commandName === 'records') {
                 if (interaction.options.getSubcommand() === 'search') {
