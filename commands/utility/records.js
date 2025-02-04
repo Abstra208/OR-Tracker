@@ -764,8 +764,12 @@ module.exports = {
                 
                 const userrow = new ActionRowBuilder().addComponents(serverlink, websitelink);
                 
-                await user.send({ embeds: [declineEmbed], components: [userrow] });
                 await interaction.update({ content: `Record ${record.name} has been declined. This thread will get deleted in 5 seconds`, embeds: [], components: [] });
+                try {
+                    await user.send({ embeds: [declineEmbed], components: [userrow] });
+                } catch (e) {
+                    await interaction.followUp({ content: `User ${user.tag} has disabled DMs.`, ephemeral: true });
+                }
                 await remove(ref(db, 'awaitRegistration/' + id));
                 await new Promise(resolve => setTimeout(resolve, 5000));
                 await thread.delete();
