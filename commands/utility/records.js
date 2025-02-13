@@ -1080,7 +1080,7 @@ module.exports = {
         if (userrecords.length > 0) {
             for (const key of userrecords) {
                 const value = records[key];
-                UserEmbed.addFields({ name: value.name, value: value.description + '\n' + key });
+                UserEmbed.addFields({ name: value.title, value: value.description + '\n' + key });
             }
         }
         UserEmbed.addFields({ name: 'Want to see more?', value: `[${userfetch.username}'s profil on ortracker.app](https://ortracker.app/users/${userfetch.id})` });
