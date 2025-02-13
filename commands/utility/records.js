@@ -179,15 +179,15 @@ module.exports = {
 
             let recordsFound = [];
             for (const [key, value] of Object.entries(records)) {
-                Name = value.name.toLowerCase()
-                if (Name.includes(record)) {
+                Title = value.title.toLowerCase()
+                if (Title.includes(record)) {
                     recordsFound.push(key);
                 }
             }
             if (recordsFound.length > 0) {
                 for (const key of recordsFound) {
                     const value = records[key];
-                    SearchEmbed.addFields({ name: value.name, value: value.description + '\n' + key });
+                    SearchEmbed.addFields({ name: value.title, value: value.description + '\n' + key });
                 }
             } else {
                 SearchEmbed.addFields({ name: 'No records found.', value: 'Try searching with another term.' });
@@ -349,15 +349,15 @@ module.exports = {
                         .setTimestamp()
                         .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
                     await interaction.update({ embeds: [UploadEmbed], components: [] });
-                    const name = interaction.message.embeds[0].fields[0].value;
+                    const title = interaction.message.embeds[0].fields[0].value;
                     const description = interaction.message.embeds[0].fields[1].value;
                     const id = this.generateRandomId();
                     await set(ref(db, 'records/' + id), {
-                        name: name,
+                        title: title,
                         description: description,
                         owner: interaction.user.id
                     });
-                    UploadEmbed.setDescription(`Record ${name} has been added to the database with ID:\n${id}.`);
+                    UploadEmbed.setDescription(`Record ${title} has been added to the database with ID:\n${id}.`);
                     await interaction.editReply({ embeds: [UploadEmbed], components: [] });                    
                 } else {
                     await interaction.reply({ content: "You do not have permission to add records.", ephemeral: true });
@@ -371,14 +371,14 @@ module.exports = {
                     .setTimestamp()
                     .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
                 await interaction.update({ embeds: [EditEmbed], components: [] });
-                const name = interaction.message.embeds[0].fields[0].value;
+                const title = interaction.message.embeds[0].fields[0].value;
                 const description = interaction.message.embeds[0].fields[1].value;
                 const id = interaction.message.embeds[0].footer.text;
                 await update(ref(db, 'records/' + id), {
-                    name: name,
+                    title: title,
                     description: description
                 });
-                EditEmbed.setDescription(`Record ${name} (${id}) has been edited in the database.`);
+                EditEmbed.setDescription(`Record ${title} (${id}) has been edited in the database.`);
                 await interaction.editReply({ embeds: [EditEmbed], components: [] });
             }
         } else if (interaction.isModalSubmit()) {
@@ -398,13 +398,13 @@ module.exports = {
                 await interaction.update({ embeds: [embed], components: [row] });
             }
             if (interaction.customId === "addRecordModal") {
-                const name = interaction.fields.getTextInputValue("name");
+                const title = interaction.fields.getTextInputValue("title");
                 const description = interaction.fields.getTextInputValue("description");
                 const AddEmbedModal = new EmbedBuilder()
                     .setColor(0x4fcf6d)
                     .setTitle(`Add a record`)
                     .setFields(
-                        { name: 'Name:', value: name },
+                        { name: 'Name:', value: title },
                         { name: 'Description:', value: description }
                     )
                     .setTimestamp()
@@ -488,7 +488,7 @@ module.exports = {
                             DeleteEmbedModal.setDescription(`No record with id: *${id}* was found.`);
                             await interaction.editReply({ embeds: [DeleteEmbedModal], ephemeral: true });
                         } else {
-                            DeleteEmbedModal.setDescription(`Record ${records[id].name} (${id}) has been deleted from the database.`);
+                            DeleteEmbedModal.setDescription(`Record ${records[id].title} (${id}) has been deleted from the database.`);
                             await remove(ref(db, 'records/' + id));
                             await interaction.editReply({ embeds: [DeleteEmbedModal], ephemeral: true });
                         }
@@ -508,7 +508,7 @@ module.exports = {
                         DeleteEmbedModal.setDescription(`No record with id: *${id}* was found.`);
                         await interaction.editReply({ embeds: [DeleteEmbedModal], ephemeral: true });
                     } else {
-                        DeleteEmbedModal.setDescription(`Record ${records[id].name} (${id}) has been deleted from the database.`);
+                        DeleteEmbedModal.setDescription(`Record ${records[id].title} (${id}) has been deleted from the database.`);
                         await remove(ref(db, 'records/' + id));
                         await interaction.editReply({ embeds: [DeleteEmbedModal], ephemeral: true });
                     }
@@ -541,7 +541,7 @@ module.exports = {
                 if (recordsFound.length > 0) {
                     for (const key of recordsFound) {
                         const value = records[key];
-                        ListEmbed.addFields({ name: value.name, value: value.description + '\n' + key });
+                        ListEmbed.addFields({ name: value.title, value: value.description + '\n' + key });
                     }
                 } else {
                     ListEmbed.addFields({ name: 'No records found.', value: 'Try searching with another term.' });
@@ -596,9 +596,9 @@ module.exports = {
                 registerModal.addComponents(
                     new ActionRowBuilder().addComponents(
                         new TextInputBuilder()
-                            .setCustomId("name")
-                            .setLabel("Name")
-                            .setPlaceholder("Enter the name of the record.")
+                            .setCustomId("title")
+                            .setLabel("Title")
+                            .setPlaceholder("Enter the title of the record.")
                             .setRequired(true)
                             .setStyle(TextInputStyle.Short),
                     ),
@@ -694,7 +694,7 @@ module.exports = {
                 const date = new Date();
 
                 await set(ref(db, 'records/' + id), {
-                    name: record.title,
+                    title: record.title,
                     description: record.description,
                     link: record.link,
                     owner: record.person,
@@ -782,11 +782,11 @@ module.exports = {
                         AcceptModalUpdate.addComponents(
                             new ActionRowBuilder().addComponents(
                                 new TextInputBuilder()
-                                    .setCustomId("name")
-                                    .setLabel("Update the name")
-                                    .setPlaceholder("Enter the new name of the record from the update reason.")
+                                    .setCustomId("title")
+                                    .setLabel("Update the title")
+                                    .setPlaceholder("Enter the new title of the record from the update reason.")
                                     .setStyle(TextInputStyle.Short)
-                                    .setValue(records[id].name),
+                                    .setValue(records[id].title),
                             ),
                             new ActionRowBuilder().addComponents(
                                 new TextInputBuilder()
@@ -820,32 +820,32 @@ module.exports = {
             }
         } else if (interaction.isModalSubmit()) {
             if (interaction.customId === 'registerModal') {
-                const name = interaction.fields.getTextInputValue("name");
+                const title = interaction.fields.getTextInputValue("title");
                 const description = interaction.fields.getTextInputValue('description');
                 const link = interaction.fields.getTextInputValue('link');
                 const id = this.generateRandomId();
                 const channelID = '1299763314816974929';
                 const channel = await interaction.client.channels.fetch(channelID);
                 await set(ref(db, 'awaitRegistration/' + id), {
-                    name: name,
+                    title: title,
                     description: description,
                     link: link,
                     person: interaction.user.id
                 });
                 ThreadEmbed.addFields(
-                    { name: 'Record:', value: name },
+                    { name: 'Record:', value: title },
                     { name: 'Description:', value: description },
                     { name: 'Link:', value: link },
                     { name: 'Person', value: `<@!${interaction.user.id}>` },
                     { name: 'ID:', value: id }
                 );
                 channel.threads.create({
-                    name: `Creation of record ${name}`,
+                    title: `Creation of record ${title}`,
                     autoArchiveDuration: 60,
-                    reason: `Verification for record ${name} with ID: ${id}.`,
-                    message: { content: `New record ${name} is waiting review by an admin`, embeds: [ThreadEmbed], components: [OptionregisterRow] }
+                    reason: `Verification for record ${title} with ID: ${id}.`,
+                    message: { content: `New record ${title} is waiting review by an admin`, embeds: [ThreadEmbed], components: [OptionregisterRow] }
                 });
-                await interaction.reply({ content: `Thank you for your submission. Record ${name} has been added to the verification list for admin review. This process may take up to two business days.`, ephemeral: true });
+                await interaction.reply({ content: `Thank you for your submission. Record ${title} has been added to the verification list for admin review. This process may take up to two business days.`, ephemeral: true });
             } else if (interaction.customId === 'updateModal') {
                 const id = interaction.fields.getTextInputValue("id");
                 const reason = interaction.fields.getTextInputValue('reason');
@@ -859,7 +859,7 @@ module.exports = {
                         link: link
                     });
                     ThreadEmbed.addFields(
-                        { name: 'Record:', value: records[id].name },
+                        { name: 'Record:', value: records[id].title },
                         { name: 'Description:', value: records[id].description },
                         { name: 'Owner', value: `<@!${records[id].owner}>` },
                         { name: 'Update reason', value: `${reason}` },
@@ -867,17 +867,17 @@ module.exports = {
                         { name: 'ID:', value: id }
                     );
                     channel.threads.create({
-                        name: `Update of record ${records[id].name}`,
+                        title: `Update of record ${records[id].title}`,
                         autoArchiveDuration: 60,
-                        reason: `Update for record ${records[id].name} with ID: ${id}.`,
-                        message: { content: `Record ${records[id].name} is waiting review by an admin`, embeds: [ThreadEmbed], components: [OptionupdateRow] }
+                        reason: `Update for record ${records[id].title} with ID: ${id}.`,
+                        message: { content: `Record ${records[id].title} is waiting review by an admin`, embeds: [ThreadEmbed], components: [OptionupdateRow] }
                     });
                     await interaction.reply({ content: `Thank you for your submission. Record with id: ${id} has been added to the verification list for admin review. This process may take up to two business days.`, ephemeral: true });
                 } else {
                     await interaction.reply({ content: `We couldn't find a record with the ID ${id}. Please check the ID and try again.`, ephemeral: true });
                 }
             } else if (interaction.customId === 'acceptmodalupdate') {
-                const name = interaction.fields.getTextInputValue("name");
+                const title = interaction.fields.getTextInputValue("title");
                 const description = interaction.fields.getTextInputValue('description');
                 const id = interaction.message.embeds[0].fields[5].value;
                 const ThreadId = await interaction.channelId;
@@ -887,12 +887,12 @@ module.exports = {
                 const user = await interaction.client.users.fetch(owner);
 
                 await update(ref(db, 'records/' + id), {
-                    name: name,
+                    title: title,
                     description: description
                 });
 
                 await remove(ref(db, 'awaitUpdate/' + id));
-                await interaction.update({ content: `Update to ${records[id].name} has been accepted. This thread will get deleted in 5 seconds`, embeds: [], components: [] });
+                await interaction.update({ content: `Update to ${records[id].title} has been accepted. This thread will get deleted in 5 seconds`, embeds: [], components: [] });
                 await new Promise(resolve => setTimeout(resolve, 5000));
 
                 const date = new Date();
@@ -935,7 +935,7 @@ module.exports = {
                 const user = await interaction.client.users.fetch(owner);
                 
                 await remove(ref(db, 'awaitUpdate/' + id));
-                await interaction.update({ content: `Update to ${records[id].name} has been declined. This thread will get deleted in 5 seconds`, embeds: [], components: [] });
+                await interaction.update({ content: `Update to ${records[id].title} has been declined. This thread will get deleted in 5 seconds`, embeds: [], components: [] });
                 await new Promise(resolve => setTimeout(resolve, 5000));
 
                 const date = new Date();
@@ -945,7 +945,7 @@ module.exports = {
                     .setTitle(`Update declined`)
                     .setDescription(`One of your update has been declined.\nIf you have any questions, please contact an admin.`)
                     .addFields(
-                        { name: 'Record:', value: records[id].name },
+                        { name: 'Record:', value: records[id].title },
                         { name: 'Update reason:', value: record.reason },
                         { name: 'Decline reason:', value: reason },
                         { name: 'ID:', value: id },
