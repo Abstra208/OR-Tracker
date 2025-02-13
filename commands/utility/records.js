@@ -445,7 +445,7 @@ module.exports = {
                     .setColor(0x4fcf6d)
                     .setTitle(`Edit a record`)
                     .setFields(
-                        { name: 'Name:', value: record.name },
+                        { name: 'Name:', value: record.title },
                         { name: 'Description:', value: record.description }
                     )
                     .setTimestamp()
@@ -694,7 +694,7 @@ module.exports = {
                 const date = new Date();
 
                 await set(ref(db, 'records/' + id), {
-                    name: record.name,
+                    name: record.title,
                     description: record.description,
                     link: record.link,
                     owner: record.person,
@@ -706,7 +706,7 @@ module.exports = {
                     .setTitle(`Record Accepted`)
                     .setDescription(`One of your records has been accepted.`)
                     .addFields(
-                        { name: 'Record:', value: record.name },
+                        { name: 'Record:', value: record.title },
                         { name: 'Description:', value: record.description },
                         { name: 'ID:', value: id },
                         { name: 'Date:', value: time(date) }
@@ -728,7 +728,7 @@ module.exports = {
 
                 await remove(ref(db, 'awaitRegistration/' + id));
                 await user.send({ embeds: [acceptEmbed], components: [userrow] });
-                await interaction.update({ content: `Record ${record.name} has been accepted. This thread will get deleted in 5 seconds`, embeds: [], components: [] });
+                await interaction.update({ content: `Record ${record.title} has been accepted. This thread will get deleted in 5 seconds`, embeds: [], components: [] });
                 await new Promise(resolve => setTimeout(resolve, 5000));
                 await thread.delete();
             } else if (interaction.customId === 'Rdeclineregister') {
@@ -745,7 +745,7 @@ module.exports = {
                     .setTitle(`Record declined`)
                     .setDescription(`One of your records has been declined.\nIf you have any questions, please contact an admin.`)
                     .addFields(
-                        { name: 'Record:', value: record.name },
+                        { name: 'Record:', value: record.title },
                         { name: 'ID:', value: id },
                         { name: 'Date:', value: time(date) }
                     )
@@ -764,7 +764,7 @@ module.exports = {
                 
                 const userrow = new ActionRowBuilder().addComponents(serverlink, websitelink);
                 
-                await interaction.update({ content: `Record ${record.name} has been declined. This thread will get deleted in 5 seconds`, embeds: [], components: [] });
+                await interaction.update({ content: `Record ${record.title} has been declined. This thread will get deleted in 5 seconds`, embeds: [], components: [] });
                 try {
                     await user.send({ embeds: [declineEmbed], components: [userrow] });
                 } catch (e) {
@@ -903,7 +903,7 @@ module.exports = {
                     .setTitle(`Record Accepted`)
                     .setDescription(`One of your records has been accepted.`)
                     .addFields(
-                        { name: 'Record:', value: updatedrecord.name },
+                        { name: 'Record:', value: updatedrecord.title },
                         { name: 'Description:', value: updatedrecord.description },
                         { name: 'ID:', value: id },
                         { name: 'Date:', value: time(date) }
@@ -1106,9 +1106,9 @@ module.exports = {
 
             const InfoEmbed = new EmbedBuilder()
                 .setColor(0x4fcf6d)
-                .setTitle(`Record ${record.name}`)
+                .setTitle(`Record ${record.title}`)
                 .addFields(
-                    { name: 'Name:', value: record.name, inline: true },
+                    { name: 'Name:', value: record.title, inline: true },
                     { name: 'Owner:', value: `<@!${owner.id}>`, inline: true },
                     { name: 'Description:', value: record.description },
                     { name: 'Proof:', value: record.link },
