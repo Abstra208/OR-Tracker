@@ -355,7 +355,7 @@ module.exports = {
                     await set(ref(db, 'records/' + id), {
                         title: title,
                         description: description,
-                        owner: interaction.user.id
+                        holder: interaction.user.id
                     });
                     UploadEmbed.setDescription(`Record ${title} has been added to the database with ID:\n${id}.`);
                     await interaction.editReply({ embeds: [UploadEmbed], components: [] });                    
@@ -434,7 +434,7 @@ module.exports = {
                 const id = interaction.fields.getTextInputValue("id");
                 const record = records[id];
 
-                if (record.owner !== interaction.user.id) {
+                if (record.holder !== interaction.user.id) {
                     if (!permission.admin.includes(interaction.user.id)) {
                         await interaction.reply({ content: "You do not have permission to edit this record.", ephemeral: true });
                         return;
@@ -475,7 +475,7 @@ module.exports = {
                 const id = interaction.fields.getTextInputValue("id");
 
                 if (!permission.admin.includes(interaction.user.id)) {
-                    if (records[id].owner !== interaction.user.id) {
+                    if (records[id].holder !== interaction.user.id) {
                         const DeleteEmbedModal = new EmbedBuilder()
                             .setColor(0x4fcf6d)
                             .setTitle(`Delete a record`)
@@ -534,7 +534,7 @@ module.exports = {
                 const records = snapshot.val();
                 let recordsFound = [];
                 for (const [key, value] of Object.entries(records)) {
-                    if (value.owner === interaction.user.id) {
+                    if (value.holder === interaction.user.id) {
                         recordsFound.push(key);
                     }
                 }
@@ -687,8 +687,8 @@ module.exports = {
             } else if (interaction.customId === 'Racceptregister') {
                 const id = interaction.message.embeds[0].fields[4].value;
                 const record = awaitRegistration[id];
-                const owner = record.person;
-                const user = await interaction.client.users.fetch(owner);
+                const holder = record.person;
+                const user = await interaction.client.users.fetch(holder);
                 const ThreadId = await interaction.channelId;
                 const thread = await interaction.client.channels.fetch(ThreadId);
                 const date = new Date();
@@ -697,7 +697,7 @@ module.exports = {
                     title: record.title,
                     description: record.description,
                     link: record.link,
-                    owner: record.person,
+                    holder: record.person,
                     creation: time(date)
                 });
 
@@ -734,8 +734,8 @@ module.exports = {
             } else if (interaction.customId === 'Rdeclineregister') {
                 const id = interaction.message.embeds[0].fields[4].value;
                 const record = awaitRegistration[id];
-                const owner = record.person;
-                const user = await interaction.client.users.fetch(owner);
+                const holder = record.person;
+                const user = await interaction.client.users.fetch(holder);
                 const ThreadId = await interaction.channelId;
                 const thread = await interaction.client.channels.fetch(ThreadId);
                 const date = new Date();
@@ -861,7 +861,7 @@ module.exports = {
                     ThreadEmbed.addFields(
                         { name: 'Record:', value: records[id].title },
                         { name: 'Description:', value: records[id].description },
-                        { name: 'Owner', value: `<@!${records[id].owner}>` },
+                        { name: 'holder', value: `<@!${records[id].holder}>` },
                         { name: 'Update reason', value: `${reason}` },
                         { name: 'Person', value: `<@!${interaction.user.id}>` },
                         { name: 'ID:', value: id }
@@ -883,8 +883,8 @@ module.exports = {
                 const ThreadId = await interaction.channelId;
                 const thread = await interaction.client.channels.fetch(ThreadId);
                 const record = awaitUpdate[id];
-                const owner = record.person;
-                const user = await interaction.client.users.fetch(owner);
+                const holder = record.person;
+                const user = await interaction.client.users.fetch(holder);
 
                 await update(ref(db, 'records/' + id), {
                     title: title,
@@ -931,8 +931,8 @@ module.exports = {
                 const ThreadId = await interaction.channelId;
                 const thread = await interaction.client.channels.fetch(ThreadId);
                 const record = awaitUpdate[id];
-                const owner = record.person;
-                const user = await interaction.client.users.fetch(owner);
+                const holder = record.person;
+                const user = await interaction.client.users.fetch(holder);
                 
                 await remove(ref(db, 'awaitUpdate/' + id));
                 await interaction.update({ content: `Update to ${records[id].title} has been declined. This thread will get deleted in 5 seconds`, embeds: [], components: [] });
@@ -984,7 +984,7 @@ module.exports = {
             const records = (await get(child(ref(db), '/records'))).val();
             const userrecords = [];
             for (const [key, value] of Object.entries(records)) {
-                if (value.owner === user.id) {
+                if (value.holder === user.id) {
                     userrecords.push(key);
                 }
             }
@@ -1065,7 +1065,7 @@ module.exports = {
         const records = (await get(child(ref(db), '/records'))).val();
         const userrecords = [];
         for (const [key, value] of Object.entries(records)) {
-            if (value.owner === user.id) {
+            if (value.holder === user.id) {
                 userrecords.push(key);
             }
         }
@@ -1093,9 +1093,9 @@ module.exports = {
             await interaction.reply({ content: `No record with id: *${id}* was found.`, ephemeral: true });
         } else {
             const record = snapshotRecord.val();
-            const snapshotUser = await get(child(ref(db), '/users/' + record.owner));
+            const snapshotUser = await get(child(ref(db), '/users/' + record.holder));
             const user = snapshotUser.val();
-            const owner = await interaction.client.users.fetch(user.id);
+            const holder = await interaction.client.users.fetch(user.id);
 
             if (record.link === undefined) {
                 await update(ref(db, 'records/' + id), {
@@ -1109,13 +1109,13 @@ module.exports = {
                 .setTitle(`Record ${record.title}`)
                 .addFields(
                     { name: 'Name:', value: record.title, inline: true },
-                    { name: 'Owner:', value: `<@!${owner.id}>`, inline: true },
+                    { name: 'holder:', value: `<@!${holder.id}>`, inline: true },
                     { name: 'Description:', value: record.description },
                     { name: 'Proof:', value: record.link },
                     { name: 'ID:', value: id },
                     { name: 'Didn\'t find what you were looking for?', value: `[See more on ortracker.app](https://ortracker.app/records/${id})` }
                 )
-                .setThumbnail(owner.displayAvatarURL())
+                .setThumbnail(holder.displayAvatarURL())
                 .setTimestamp()
                 .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
 
